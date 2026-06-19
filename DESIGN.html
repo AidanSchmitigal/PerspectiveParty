@@ -1,0 +1,976 @@
+<!doctype html>
+
+<!-- I need help designing a web page, a couple different pages on the web page, and the general interface that I want. So I want to make a sort of Kahoot-like web game where there's a presenter and then everybody on their phones can do stuff. And so I need help coming up with designs for how this should look. And I want to go for some more whimsical, light mode, like child's drawing look. Things are sort of slightly rotated, the tools are like paintbrush icons and things. And everything's got like fun textures and squiggles and things like that. I also want to put in some like squish sounds or like the honk noises, you know, like whatever that design style is like. Basically, I need a view for the presenter view, which is going to have like a spinning 3D object, as well as a row of everybody participating at the bottom. And then the phone views, which are going to include the like canvas where someone can draw and then a like submit button when they're done. And on all of these, it needs to show like little avatar icons and in the game lobby as people are joining, we need a page for the game lobby both on the phones and the presenter view. And it needs to be able to show like fun character icons and things like that on the character creator. So there's a lot of things to think about, and so I need your help coming up with all those parts, and then we can move into design. -->
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Perspective Party — design mockup</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Patrick+Hand&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--paper: #fff8ea;
+				--paper-dark: #fbefd4;
+				--ink: #3a332c;
+				--coral: #ff6b5b;
+				--coral-dark: #c8462f;
+				--yellow: #ffc83d;
+				--yellow-dark: #c98a0b;
+				--sky: #52bfee;
+				--sky-dark: #1c7fae;
+				--grass: #7bc95e;
+				--grass-dark: #3e8a22;
+				--grape: #b083e8;
+				--grape-dark: #6e3fb8;
+				--pink: #f490b8;
+				--pink-dark: #c24a7f;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				font-family: 'Patrick Hand', cursive;
+				background: var(--paper);
+				background-image: radial-gradient(
+					circle at 1px 1px,
+					rgba(58, 51, 44, 0.07) 1px,
+					transparent 0
+				);
+				background-size: 22px 22px;
+				color: var(--ink);
+				padding: 24px 16px 60px;
+			}
+			h1,
+			h2,
+			h3,
+			.title-font {
+				font-family: 'Baloo 2', cursive;
+			}
+			.squiggle-underline {
+				display: inline-block;
+				position: relative;
+			}
+			.squiggle-underline svg {
+				display: block;
+				width: 100%;
+				height: 10px;
+				margin-top: -2px;
+			}
+
+			/* ---- top demo nav (not part of the product, just lets you flip screens) ---- */
+			.demo-nav {
+				max-width: 1000px;
+				margin: 0 auto 28px;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				justify-content: center;
+			}
+			.demo-nav button {
+				font-family: 'Baloo 2', cursive;
+				font-size: 14px;
+				font-weight: 700;
+				background: #fff;
+				color: var(--ink);
+				border: 3px solid var(--ink);
+				border-radius: 14px;
+				padding: 9px 16px;
+				cursor: pointer;
+				box-shadow: 3px 3px 0 var(--ink);
+				transition: transform 0.12s ease;
+			}
+			.demo-nav button:hover {
+				transform: translate(-1px, -1px);
+			}
+			.demo-nav button:active {
+				transform: translate(2px, 2px);
+				box-shadow: 1px 1px 0 var(--ink);
+			}
+			.demo-nav button.active {
+				background: var(--yellow);
+			}
+
+			.screen {
+				display: none;
+				max-width: 1000px;
+				margin: 0 auto;
+			}
+			.screen.active {
+				display: block;
+			}
+
+			/* ---- device frames ---- */
+			.laptop-frame {
+				background: #fff;
+				border: 5px solid var(--ink);
+				border-radius: 18px;
+				padding: 18px 22px 22px;
+				box-shadow: 7px 7px 0 var(--ink);
+				background-image: linear-gradient(180deg, #fffef9, #fff);
+			}
+			.phone-frame {
+				width: 340px;
+				margin: 0 auto;
+				background: #fff;
+				border: 5px solid var(--ink);
+				border-radius: 34px;
+				padding: 14px 12px 18px;
+				box-shadow: 6px 6px 0 var(--ink);
+			}
+			.phone-notch {
+				width: 70px;
+				height: 8px;
+				background: var(--ink);
+				border-radius: 8px;
+				margin: 0 auto 10px;
+			}
+
+			/* ---- generic sticker card ---- */
+			.sticker {
+				background: #fff;
+				border: 3.5px solid var(--ink);
+				border-radius: 16px 20px 18px 22px;
+				box-shadow: 4px 4px 0 var(--ink);
+				padding: 14px 16px;
+			}
+			.rot-1 {
+				transform: rotate(-1.4deg);
+			}
+			.rot-2 {
+				transform: rotate(1.1deg);
+			}
+			.rot-3 {
+				transform: rotate(-0.6deg);
+			}
+
+			/* ---- buttons ---- */
+			.btn {
+				font-family: 'Baloo 2', cursive;
+				font-weight: 700;
+				font-size: 16px;
+				color: var(--ink);
+				border: 3px solid var(--ink);
+				border-radius: 16px;
+				padding: 11px 22px;
+				cursor: pointer;
+				box-shadow: 3px 3px 0 var(--ink);
+				transition:
+					transform 0.1s ease,
+					box-shadow 0.1s ease;
+				background: var(--yellow);
+			}
+			.btn:hover {
+				transform: translate(-1px, -2px) rotate(-1deg);
+			}
+			.btn:active {
+				transform: translate(2px, 2px) scale(0.97);
+				box-shadow: 1px 1px 0 var(--ink);
+			}
+			.btn.coral {
+				background: var(--coral);
+				color: #3a1208;
+			}
+			.btn.sky {
+				background: var(--sky);
+			}
+			.btn.grass {
+				background: var(--grass);
+			}
+			.btn.grape {
+				background: var(--grape);
+				color: #fff;
+			}
+			.btn.ghost {
+				background: #fff;
+			}
+			.btn:disabled {
+				opacity: 0.45;
+				cursor: not-allowed;
+			}
+
+			/* ---- avatars (blobby paper-cutout faces) ---- */
+			.avatar {
+				width: 54px;
+				height: 54px;
+				border: 3px solid var(--ink);
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 24px;
+				box-shadow: 2px 2px 0 var(--ink);
+				flex-shrink: 0;
+			}
+			.avatar.blob1 {
+				border-radius: 55% 45% 50% 50% / 50% 55% 45% 50%;
+			}
+			.avatar.blob2 {
+				border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%;
+			}
+			.avatar.blob3 {
+				border-radius: 50% 50% 45% 55% / 45% 50% 55% 50%;
+			}
+			.avatar-mini {
+				width: 38px;
+				height: 38px;
+				font-size: 18px;
+			}
+			.avatar-name {
+				font-size: 13px;
+				text-align: center;
+				margin-top: 4px;
+				font-weight: 700;
+				color: var(--ink);
+				max-width: 64px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			/* ---- confetti doodles ---- */
+			.confetti-wrap {
+				position: relative;
+			}
+			.confetti {
+				position: absolute;
+				font-size: 20px;
+				opacity: 0.8;
+				animation: float 3.5s ease-in-out infinite;
+			}
+			@keyframes float {
+				0%,
+				100% {
+					transform: translateY(0) rotate(0deg);
+				}
+				50% {
+					transform: translateY(-10px) rotate(12deg);
+				}
+			}
+
+			/* ===================== PRESENTER LOBBY ===================== */
+			.room-code-sticker {
+				background: var(--coral);
+				border: 4px solid var(--ink);
+				border-radius: 20px;
+				padding: 18px 30px;
+				display: inline-block;
+				box-shadow: 5px 5px 0 var(--ink);
+				transform: rotate(-2deg);
+			}
+			.room-code-sticker .code {
+				font-family: 'Baloo 2', cursive;
+				font-size: 46px;
+				font-weight: 800;
+				color: #3a1208;
+				letter-spacing: 6px;
+			}
+			.player-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+				gap: 14px;
+				margin-top: 18px;
+			}
+			.player-tile {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+
+			/* ===================== PRESENTER GAME VIEW ===================== */
+			.scene {
+				height: 300px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: repeating-linear-gradient(
+					135deg,
+					rgba(82, 191, 238, 0.1) 0 14px,
+					transparent 14px 28px
+				);
+				border: 3px dashed var(--ink);
+				border-radius: 18px;
+				position: relative;
+				overflow: hidden;
+			}
+			.cube-wrap {
+				perspective: 700px;
+			}
+			.cube {
+				width: 120px;
+				height: 120px;
+				position: relative;
+				transform-style: preserve-3d;
+				animation: spin 7s linear infinite;
+			}
+			@keyframes spin {
+				from {
+					transform: rotateX(0deg) rotateY(0deg);
+				}
+				to {
+					transform: rotateX(360deg) rotateY(360deg);
+				}
+			}
+			.face {
+				position: absolute;
+				width: 120px;
+				height: 120px;
+				border: 4px solid var(--ink);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 38px;
+				font-family: 'Baloo 2', cursive;
+				font-weight: 800;
+			}
+			.f1 {
+				background: var(--coral);
+				transform: translateZ(60px);
+			}
+			.f2 {
+				background: var(--sky);
+				transform: rotateY(180deg) translateZ(60px);
+			}
+			.f3 {
+				background: var(--yellow);
+				transform: rotateY(90deg) translateZ(60px);
+			}
+			.f4 {
+				background: var(--grass);
+				transform: rotateY(-90deg) translateZ(60px);
+			}
+			.f5 {
+				background: var(--grape);
+				transform: rotateX(90deg) translateZ(60px);
+				color: #fff;
+			}
+			.f6 {
+				background: var(--pink);
+				transform: rotateX(-90deg) translateZ(60px);
+			}
+
+			.timer-pill {
+				position: absolute;
+				top: 14px;
+				right: 14px;
+				background: #fff;
+				border: 3px solid var(--ink);
+				border-radius: 30px;
+				padding: 6px 18px;
+				font-family: 'Baloo 2', cursive;
+				font-weight: 800;
+				font-size: 20px;
+				box-shadow: 3px 3px 0 var(--ink);
+				transform: rotate(3deg);
+			}
+			.question-banner {
+				text-align: center;
+				font-family: 'Baloo 2', cursive;
+				font-size: 22px;
+				font-weight: 700;
+				margin: 14px 0 6px;
+			}
+			.player-row {
+				display: flex;
+				gap: 10px;
+				margin-top: 18px;
+				overflow-x: auto;
+				padding: 6px 4px 10px;
+			}
+			.player-row .player-tile {
+				flex-shrink: 0;
+			}
+			.score-badge {
+				background: var(--grass);
+				border: 2px solid var(--ink);
+				border-radius: 10px;
+				font-size: 11px;
+				font-weight: 700;
+				padding: 1px 6px;
+				margin-top: 2px;
+			}
+
+			/* ===================== PHONE LOBBY ===================== */
+			.phone-screen-pad {
+				padding: 6px 6px 2px;
+			}
+			.waiting-text {
+				text-align: center;
+				font-family: 'Baloo 2', cursive;
+				font-size: 18px;
+				margin: 10px 0;
+			}
+			.mini-confetti-bar {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				justify-content: center;
+				margin-top: 14px;
+			}
+
+			/* ===================== CHARACTER CREATOR ===================== */
+			.creator-preview {
+				display: flex;
+				justify-content: center;
+				margin: 6px 0 14px;
+			}
+			.big-avatar {
+				width: 130px;
+				height: 130px;
+				font-size: 60px;
+				border-width: 4px;
+			}
+			.swatch-row {
+				display: flex;
+				gap: 8px;
+				justify-content: center;
+				margin-bottom: 12px;
+				flex-wrap: wrap;
+			}
+			.swatch {
+				width: 34px;
+				height: 34px;
+				border-radius: 50%;
+				border: 3px solid var(--ink);
+				cursor: pointer;
+			}
+			.swatch.selected {
+				box-shadow:
+					0 0 0 3px #fff,
+					0 0 0 6px var(--ink);
+			}
+			.accessory-row {
+				display: flex;
+				gap: 8px;
+				justify-content: center;
+				flex-wrap: wrap;
+				margin-bottom: 8px;
+			}
+			.accessory-btn {
+				width: 46px;
+				height: 46px;
+				border: 3px solid var(--ink);
+				border-radius: 12px;
+				background: #fff;
+				font-size: 22px;
+				cursor: pointer;
+				box-shadow: 2px 2px 0 var(--ink);
+			}
+			.accessory-btn.selected {
+				background: var(--yellow);
+			}
+			.label-tag {
+				font-family: 'Baloo 2', cursive;
+				font-weight: 700;
+				font-size: 13px;
+				text-align: center;
+				margin: 10px 0 6px;
+			}
+			.name-input {
+				width: 100%;
+				font-family: 'Patrick Hand', cursive;
+				font-size: 18px;
+				border: 3px solid var(--ink);
+				border-radius: 12px;
+				padding: 8px 12px;
+				text-align: center;
+				background: #fffef9;
+			}
+
+			/* ===================== PHONE DRAW + SUBMIT ===================== */
+			.canvas-wrap {
+				border: 4px solid var(--ink);
+				border-radius: 14px;
+				overflow: hidden;
+				background: #fff;
+				box-shadow: 3px 3px 0 var(--ink);
+			}
+			#drawCanvas {
+				display: block;
+				width: 100%;
+				height: 260px;
+				touch-action: none;
+				background: #fffef9;
+			}
+			.tool-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin: 10px 0;
+				justify-content: center;
+				flex-wrap: wrap;
+			}
+			.tool-btn {
+				width: 40px;
+				height: 40px;
+				border: 3px solid var(--ink);
+				border-radius: 10px;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: #fff;
+			}
+			.tool-btn.selected {
+				background: var(--yellow);
+			}
+			.color-dot {
+				width: 26px;
+				height: 26px;
+				border-radius: 50%;
+				border: 3px solid var(--ink);
+				cursor: pointer;
+			}
+			.color-dot.selected {
+				box-shadow:
+					0 0 0 2px #fff,
+					0 0 0 5px var(--ink);
+			}
+			.prompt-banner {
+				background: var(--sky);
+				border: 3px solid var(--ink);
+				border-radius: 14px;
+				padding: 10px 14px;
+				text-align: center;
+				font-family: 'Baloo 2', cursive;
+				font-weight: 700;
+				font-size: 16px;
+				margin-bottom: 10px;
+				box-shadow: 3px 3px 0 var(--ink);
+				transform: rotate(-1deg);
+			}
+			.top-avatar-strip {
+				display: flex;
+				gap: 6px;
+				justify-content: center;
+				margin-bottom: 8px;
+			}
+
+			.section-label {
+				font-family: 'Baloo 2', cursive;
+				font-size: 13px;
+				color: var(--ink);
+				opacity: 0.6;
+				text-align: center;
+				margin-bottom: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="demo-nav" id="demoNav">
+			<button data-screen="presenter-lobby" class="active">presenter · lobby</button>
+			<button data-screen="presenter-game">presenter · game view</button>
+			<button data-screen="phone-lobby">phone · lobby</button>
+			<button data-screen="character-creator">phone · character creator</button>
+			<button data-screen="phone-draw">phone · draw &amp; submit</button>
+		</div>
+
+		<!-- ===================== PRESENTER LOBBY ===================== -->
+		<div class="screen active" id="presenter-lobby">
+			<div class="section-label">
+				presenter screen — shown on the big display, everyone joins on their phones
+			</div>
+			<div class="laptop-frame confetti-wrap">
+				<span class="confetti" style="top: 6px; left: 10%; animation-delay: 0.2s">✦</span>
+				<span class="confetti" style="top: 30px; left: 80%; animation-delay: 1s">🎈</span>
+				<span class="confetti" style="top: 6px; left: 55%; animation-delay: 1.6s">✦</span>
+				<span class="confetti" style="top: 60px; left: 30%; animation-delay: 0.8s">🎈</span>
+
+				<div style="text-align: center">
+					<h1 class="squiggle-underline" style="font-size: 34px; margin: 0 0 6px">Doodle Party</h1>
+					<p style="margin: 0 0 16px; font-size: 16px">grab your phone and join the room</p>
+					<div class="room-code-sticker">
+						<div style="font-size: 13px; font-weight: 700; margin-bottom: 2px">room code</div>
+						<div class="code">PNUT4</div>
+					</div>
+				</div>
+
+				<h3 style="margin: 22px 0 0; text-align: center">7 doodlers in the room</h3>
+				<div class="player-grid">
+					<div class="player-tile">
+						<div class="avatar blob1" style="background: var(--coral)">😺</div>
+						<div class="avatar-name">Mochi</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar blob2" style="background: var(--sky)">🐸</div>
+						<div class="avatar-name">Lentil</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar blob3" style="background: var(--yellow)">🦊</div>
+						<div class="avatar-name">Pixel</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar blob1" style="background: var(--grass)">🐼</div>
+						<div class="avatar-name">Waffles</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar blob2" style="background: var(--grape)">🐙</div>
+						<div class="avatar-name">Biscuit</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar blob3" style="background: var(--pink)">🐝</div>
+						<div class="avatar-name">Gizmo</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar blob1" style="background: #fff; border-style: dashed">…</div>
+						<div class="avatar-name">joining</div>
+					</div>
+				</div>
+
+				<div style="text-align: center; margin-top: 24px">
+					<button class="btn coral" style="font-size: 20px">start game ▶</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ===================== PRESENTER GAME VIEW ===================== -->
+		<div class="screen" id="presenter-game">
+			<div class="section-label">
+				presenter screen — main round, spinning prompt object + live player row
+			</div>
+			<div class="laptop-frame">
+				<div class="question-banner">what does "BORROW MY ARMOR" look like?</div>
+				<div class="scene">
+					<div class="timer-pill">0:42</div>
+					<div class="cube-wrap">
+						<div class="cube">
+							<div class="face f1">?</div>
+							<div class="face f2">?</div>
+							<div class="face f3">?</div>
+							<div class="face f4">?</div>
+							<div class="face f5">?</div>
+							<div class="face f6">?</div>
+						</div>
+					</div>
+				</div>
+				<div class="player-row">
+					<div class="player-tile">
+						<div class="avatar avatar-mini blob1" style="background: var(--coral)">😺</div>
+						<div class="score-badge">drawing…</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar avatar-mini blob2" style="background: var(--sky)">🐸</div>
+						<div class="score-badge">✓ done</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar avatar-mini blob3" style="background: var(--yellow)">🦊</div>
+						<div class="score-badge">✓ done</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar avatar-mini blob1" style="background: var(--grass)">🐼</div>
+						<div class="score-badge">drawing…</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar avatar-mini blob2" style="background: var(--grape)">🐙</div>
+						<div class="score-badge">✓ done</div>
+					</div>
+					<div class="player-tile">
+						<div class="avatar avatar-mini blob3" style="background: var(--pink)">🐝</div>
+						<div class="score-badge">drawing…</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ===================== PHONE LOBBY ===================== -->
+		<div class="screen" id="phone-lobby">
+			<div class="section-label">phone screen — waiting room after entering the code</div>
+			<div class="phone-frame">
+				<div class="phone-notch"></div>
+				<div class="phone-screen-pad">
+					<h2
+						class="squiggle-underline"
+						style="text-align: center; font-size: 24px; margin: 4px 0 0"
+					>
+						Doodle Party
+					</h2>
+					<div class="waiting-text">waiting for the host to start…</div>
+					<div style="display: flex; justify-content: center; margin: 10px 0">
+						<div
+							class="avatar big-avatar blob2"
+							style="background: var(--grass); width: 90px; height: 90px; font-size: 42px"
+						>
+							🐼
+						</div>
+					</div>
+					<div class="label-tag" style="font-size: 16px">you're in as Waffles</div>
+					<div class="mini-confetti-bar">
+						<div class="avatar avatar-mini blob1" style="background: var(--coral)">😺</div>
+						<div class="avatar avatar-mini blob2" style="background: var(--sky)">🐸</div>
+						<div class="avatar avatar-mini blob3" style="background: var(--yellow)">🦊</div>
+						<div class="avatar avatar-mini blob2" style="background: var(--grape)">🐙</div>
+						<div class="avatar avatar-mini blob3" style="background: var(--pink)">🐝</div>
+					</div>
+					<p style="text-align: center; font-size: 13px; opacity: 0.65; margin-top: 6px">
+						6 doodlers ready
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- ===================== CHARACTER CREATOR ===================== -->
+		<div class="screen" id="character-creator">
+			<div class="section-label">
+				phone screen — pick a face, a color, and a name before joining
+			</div>
+			<div class="phone-frame">
+				<div class="phone-notch"></div>
+				<div class="phone-screen-pad">
+					<h2 style="text-align: center; font-size: 20px; margin: 4px 0 8px">make your doodler</h2>
+					<div class="creator-preview">
+						<div class="avatar big-avatar blob1" id="ccPreview" style="background: var(--coral)">
+							🐸
+						</div>
+					</div>
+					<div class="label-tag">paint color</div>
+					<div class="swatch-row" id="ccSwatches">
+						<div
+							class="swatch selected"
+							style="background: var(--coral)"
+							data-color="var(--coral)"
+						></div>
+						<div class="swatch" style="background: var(--sky)" data-color="var(--sky)"></div>
+						<div class="swatch" style="background: var(--yellow)" data-color="var(--yellow)"></div>
+						<div class="swatch" style="background: var(--grass)" data-color="var(--grass)"></div>
+						<div class="swatch" style="background: var(--grape)" data-color="var(--grape)"></div>
+						<div class="swatch" style="background: var(--pink)" data-color="var(--pink)"></div>
+					</div>
+					<div class="label-tag">face</div>
+					<div class="accessory-row" id="ccFaces">
+						<button class="accessory-btn selected" data-face="🐸">🐸</button>
+						<button class="accessory-btn" data-face="😺">😺</button>
+						<button class="accessory-btn" data-face="🐼">🐼</button>
+						<button class="accessory-btn" data-face="🦊">🦊</button>
+						<button class="accessory-btn" data-face="🐙">🐙</button>
+						<button class="accessory-btn" data-face="🐝">🐝</button>
+					</div>
+					<div class="label-tag">name your doodler</div>
+					<input class="name-input" id="ccName" placeholder="Lentil" maxlength="14" />
+					<div style="text-align: center; margin-top: 16px">
+						<button class="btn grass" style="width: 100%">join the room 🎉</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ===================== PHONE DRAW + SUBMIT ===================== -->
+		<div class="screen" id="phone-draw">
+			<div class="section-label">phone screen — sketch your answer, then submit</div>
+			<div class="phone-frame">
+				<div class="phone-notch"></div>
+				<div class="phone-screen-pad">
+					<div class="top-avatar-strip">
+						<div class="avatar avatar-mini blob1" style="background: var(--coral)">😺</div>
+						<div class="avatar avatar-mini blob2" style="background: var(--sky)">🐸</div>
+						<div class="avatar avatar-mini blob3" style="background: var(--yellow)">🦊</div>
+						<div class="avatar avatar-mini blob1" style="background: var(--grass)">🐼</div>
+					</div>
+					<div class="prompt-banner">draw: "borrow my armor"</div>
+					<div class="canvas-wrap">
+						<canvas id="drawCanvas"></canvas>
+					</div>
+					<div class="tool-row">
+						<div
+							class="color-dot selected"
+							style="background: var(--ink)"
+							data-color="#3A332C"
+						></div>
+						<div class="color-dot" style="background: var(--coral)" data-color="#FF6B5B"></div>
+						<div class="color-dot" style="background: var(--sky)" data-color="#52BFEE"></div>
+						<div class="color-dot" style="background: var(--grass)" data-color="#7BC95E"></div>
+						<div class="color-dot" style="background: var(--yellow)" data-color="#FFC83D"></div>
+						<div
+							class="color-dot"
+							style="background: #fff"
+							data-color="#fffef9"
+							title="eraser"
+						></div>
+						<button class="tool-btn" id="brushThin" title="thin brush">·</button>
+						<button
+							class="tool-btn selected"
+							id="brushThick"
+							title="thick brush"
+							style="font-size: 20px"
+						>
+							●
+						</button>
+						<button class="tool-btn" id="clearCanvas" title="clear">↺</button>
+					</div>
+					<button class="btn coral" id="submitBtn" style="width: 100%; font-size: 18px">
+						submit drawing 🎨
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			// ---- screen switching ----
+			const nav = document.getElementById('demoNav');
+			nav.addEventListener('click', (e) => {
+				const btn = e.target.closest('button');
+				if (!btn) return;
+				document.querySelectorAll('.demo-nav button').forEach((b) => b.classList.remove('active'));
+				btn.classList.add('active');
+				document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+				document.getElementById(btn.dataset.screen).classList.add('active');
+			});
+
+			// ---- squiggle underline svg generator ----
+			document.querySelectorAll('.squiggle-underline').forEach((el) => {
+				const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+				svg.setAttribute('viewBox', '0 0 200 10');
+				svg.setAttribute('preserveAspectRatio', 'none');
+				svg.innerHTML =
+					'<path d="M0,6 Q10,0 20,6 T40,6 T60,6 T80,6 T100,6 T120,6 T140,6 T160,6 T180,6 T200,6" stroke="' +
+					getComputedStyle(document.documentElement).getPropertyValue('--coral') +
+					'" stroke-width="4" fill="none" stroke-linecap="round"/>';
+				el.appendChild(svg);
+			});
+
+			// ---- simple synthesized sound effects ----
+			let actx;
+			function ctx() {
+				if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+				return actx;
+			}
+			function honk() {
+				const c = ctx();
+				const o = c.createOscillator();
+				const g = c.createGain();
+				o.type = 'square';
+				o.frequency.setValueAtTime(220, c.currentTime);
+				o.frequency.exponentialRampToValueAtTime(140, c.currentTime + 0.18);
+				g.gain.setValueAtTime(0.18, c.currentTime);
+				g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.22);
+				o.connect(g);
+				g.connect(c.destination);
+				o.start();
+				o.stop(c.currentTime + 0.22);
+			}
+			function squish() {
+				const c = ctx();
+				const o = c.createOscillator();
+				const g = c.createGain();
+				o.type = 'sine';
+				o.frequency.setValueAtTime(500, c.currentTime);
+				o.frequency.exponentialRampToValueAtTime(90, c.currentTime + 0.14);
+				g.gain.setValueAtTime(0.15, c.currentTime);
+				g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.16);
+				o.connect(g);
+				g.connect(c.destination);
+				o.start();
+				o.stop(c.currentTime + 0.16);
+			}
+			document.querySelectorAll('.btn').forEach((b) => b.addEventListener('click', squish));
+			document
+				.querySelectorAll('.accessory-btn,.swatch,.tool-btn,.color-dot')
+				.forEach((b) => b.addEventListener('click', honk));
+
+			// ---- character creator wiring ----
+			const ccPreview = document.getElementById('ccPreview');
+			document.getElementById('ccSwatches').addEventListener('click', (e) => {
+				const sw = e.target.closest('.swatch');
+				if (!sw) return;
+				document
+					.querySelectorAll('#ccSwatches .swatch')
+					.forEach((s) => s.classList.remove('selected'));
+				sw.classList.add('selected');
+				ccPreview.style.background = sw.style.background;
+			});
+			document.getElementById('ccFaces').addEventListener('click', (e) => {
+				const f = e.target.closest('.accessory-btn');
+				if (!f) return;
+				document
+					.querySelectorAll('#ccFaces .accessory-btn')
+					.forEach((b) => b.classList.remove('selected'));
+				f.classList.add('selected');
+				ccPreview.textContent = f.dataset.face;
+			});
+
+			// ---- drawing canvas ----
+			const canvas = document.getElementById('drawCanvas');
+			const dctx = canvas.getContext('2d');
+			function fitCanvas() {
+				const rect = canvas.getBoundingClientRect();
+				canvas.width = rect.width * 2;
+				canvas.height = rect.height * 2;
+				dctx.scale(2, 2);
+				dctx.lineCap = 'round';
+				dctx.lineJoin = 'round';
+			}
+			window.addEventListener('resize', () => {
+				const img = canvas.toDataURL();
+				fitCanvas();
+			});
+			setTimeout(fitCanvas, 50);
+
+			let drawing = false,
+				lastX = 0,
+				lastY = 0,
+				strokeColor = '#3A332C',
+				strokeWidth = 10;
+			function pos(e) {
+				const rect = canvas.getBoundingClientRect();
+				const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+				const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+				return [cx, cy];
+			}
+			function start(e) {
+				drawing = true;
+				[lastX, lastY] = pos(e);
+			}
+			function move(e) {
+				if (!drawing) return;
+				e.preventDefault();
+				const [x, y] = pos(e);
+				dctx.strokeStyle = strokeColor;
+				dctx.lineWidth = strokeWidth;
+				dctx.beginPath();
+				dctx.moveTo(lastX, lastY);
+				dctx.lineTo(x, y);
+				dctx.stroke();
+				[lastX, lastY] = [x, y];
+			}
+			function end() {
+				drawing = false;
+			}
+			canvas.addEventListener('mousedown', start);
+			canvas.addEventListener('mousemove', move);
+			canvas.addEventListener('mouseup', end);
+			canvas.addEventListener('mouseleave', end);
+			canvas.addEventListener('touchstart', start);
+			canvas.addEventListener('touchmove', move);
+			canvas.addEventListener('touchend', end);
+
+			document.querySelectorAll('.color-dot').forEach((dot) => {
+				dot.addEventListener('click', () => {
+					document.querySelectorAll('.color-dot').forEach((d) => d.classList.remove('selected'));
+					dot.classList.add('selected');
+					strokeColor = dot.dataset.color;
+				});
+			});
+			document.getElementById('brushThin').addEventListener('click', () => {
+				strokeWidth = 3;
+				document.getElementById('brushThin').classList.add('selected');
+				document.getElementById('brushThick').classList.remove('selected');
+			});
+			document.getElementById('brushThick').addEventListener('click', () => {
+				strokeWidth = 10;
+				document.getElementById('brushThick').classList.add('selected');
+				document.getElementById('brushThin').classList.remove('selected');
+			});
+			document.getElementById('clearCanvas').addEventListener('click', () => {
+				dctx.clearRect(0, 0, canvas.width, canvas.height);
+			});
+			document.getElementById('submitBtn').addEventListener('click', function () {
+				honk();
+				this.textContent = 'submitted! ✓';
+				this.disabled = true;
+			});
+		</script>
+	</body>
+</html>
