@@ -18,12 +18,14 @@ const defaultNames = ['Squiggle', 'Doodle', 'Wobble', 'Noodle', 'Zigzag', 'Pebbl
 class GameRoom {
 	state: GameState;
 	private connections = new Map<string, WebSocket>();
+	destroyed = false;
 
 	constructor(roomCode: string) {
 		this.state = {
 			roomCode,
 			phase: 'lobby',
 			round: 0,
+			presenterId: null,
 			challenge: challenges[0],
 			players: [],
 			updatedAt: Date.now()
@@ -33,14 +35,33 @@ class GameRoom {
 	addConnection(id: string, ws: WebSocket) {
 		this.connections.set(id, ws);
 		ws.send(JSON.stringify({ type: 'hello', id } satisfies ServerMessage));
-		this.ensurePlayer(id);
+
+		if (!this.state.presenterId) {
+			this.state.presenterId = id;
+		}
+
 		this.broadcastState();
 	}
 
 	removeConnection(id: string) {
-		const player = this.state.players.find((candidate) => candidate.id === id);
-		if (player) player.connected = false;
 		this.connections.delete(id);
+
+		if (id === this.state.presenterId && !this.destroyed) {
+			this.destroyed = true;
+			for (const [, ws] of this.connections) {
+				ws.close(1000, 'Presenter disconnected');
+			}
+			this.state.players = [];
+			this.state.presenterId = null;
+			this.broadcastState();
+			return;
+		}
+
+		const wasPlayer = this.state.players.some((p) => p.id === id);
+		if (wasPlayer) {
+			this.state.players = this.state.players.filter((p) => p.id !== id);
+		}
+
 		this.touch();
 		this.broadcastState();
 	}
@@ -103,28 +124,16 @@ class GameRoom {
 		return this.connections.size === 0;
 	}
 
-	private makeInitialState(): GameState {
+	private makeInitialState() {
 		return {
 			roomCode: this.state.roomCode,
 			phase: 'lobby',
 			round: 0,
+			presenterId: null,
 			challenge: challenges[0],
 			players: [],
 			updatedAt: Date.now()
 		};
-	}
-
-	private ensurePlayer(id: string) {
-		if (this.state.players.some((player) => player.id === id)) return;
-		const name = defaultNames[this.state.players.length % defaultNames.length];
-		this.state.players.push({
-			id,
-			name,
-			avatar: makeAvatar(id),
-			score: 0,
-			connected: true,
-			joinedAt: Date.now()
-		});
 	}
 
 	private upsertPlayer(id: string, name: string, avatar: Avatar) {
@@ -205,7 +214,7 @@ wss.on('connection', (ws, req) => {
 
 	ws.on('close', () => {
 		room?.removeConnection(id);
-		if (room?.isEmpty) {
+		if (room?.isEmpty || room?.destroyed) {
 			rooms.delete(roomCode);
 		}
 	});

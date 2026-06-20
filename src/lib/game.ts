@@ -1,10 +1,7 @@
 export type Phase = 'lobby' | 'study' | 'draw' | 'reveal';
 
 export type Avatar = {
-	seed: string;
-	color: string;
-	shape: 'blob' | 'squircle' | 'star' | 'pebble';
-	motif: 'spark' | 'eye' | 'orbit' | 'bolt' | 'flower' | 'moon';
+	drawing: string;
 };
 
 export type Player = {
@@ -30,6 +27,7 @@ export type GameState = {
 	roomCode: string;
 	phase: Phase;
 	round: number;
+	presenterId: string | null;
 	challenge: Challenge;
 	players: Player[];
 	updatedAt: number;
@@ -47,10 +45,6 @@ export type ClientMessage =
 	| { type: 'reset' };
 
 export type ServerMessage = { type: 'state'; state: GameState } | { type: 'hello'; id: string };
-
-export const avatarColors = ['#ff6b5b', '#ffc83d', '#52bfee', '#7bc95e', '#b083e8', '#f490b8'];
-export const avatarShapes: Avatar['shape'][] = ['blob', 'squircle', 'star', 'pebble'];
-export const avatarMotifs: Avatar['motif'][] = ['spark', 'eye', 'orbit', 'bolt', 'flower', 'moon'];
 
 export const challenges: Challenge[] = [
 	{
@@ -92,14 +86,8 @@ export function makeRoomCode() {
 	return code;
 }
 
-export function makeAvatar(seed = cryptoSafeRandom()) {
-	const pick = (length: number, offset: number) => Math.abs(hashSeed(seed + offset)) % length;
-	return {
-		seed,
-		color: avatarColors[pick(avatarColors.length, 1)],
-		shape: avatarShapes[pick(avatarShapes.length, 2)],
-		motif: avatarMotifs[pick(avatarMotifs.length, 3)]
-	} satisfies Avatar;
+export function makeAvatar() {
+	return { drawing: '' } satisfies Avatar;
 }
 
 export function sanitizeName(name: string) {
@@ -107,16 +95,4 @@ export function sanitizeName(name: string) {
 	return clean || `Player ${Math.floor(Math.random() * 90) + 10}`;
 }
 
-function hashSeed(seed: string) {
-	let hash = 0;
-	for (let index = 0; index < seed.length; index += 1) {
-		hash = (hash << 5) - hash + seed.charCodeAt(index);
-		hash |= 0;
-	}
-	return hash;
-}
 
-function cryptoSafeRandom() {
-	if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
-	return Math.random().toString(36).slice(2);
-}
