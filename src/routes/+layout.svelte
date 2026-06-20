@@ -7,11 +7,5 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 <main class="app-shell">
-	<header class="topbar">
-		<div>
-			<p class="eyebrow">Perspective Party</p>
-			<h1>Draw the shape!</h1>
-		</div>
-	</header>
 	{@render children()}
 </main>

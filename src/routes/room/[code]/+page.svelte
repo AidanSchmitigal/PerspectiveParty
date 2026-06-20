@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { replaceState } from '$app/navigation';
 	import { SvelteURL } from 'svelte/reactivity';
 	import QRCode from 'qrcode';
 	import { roomState } from '$lib/room.svelte';
@@ -18,7 +17,12 @@
 
 	let { params } = $props();
 
-	let roomCode = $derived(params.code.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8));
+	let roomCode = $derived(
+		params.code
+			.toUpperCase()
+			.replace(/[^A-Z0-9]/g, '')
+			.slice(0, 8)
+	);
 	let socket = $state<WebSocket | null>(null);
 	let selfId = $state('');
 	let gameState = $state<GameState | null>(null);
@@ -38,7 +42,13 @@
 	let isPresenter = $derived(gameState?.presenterId === selfId);
 
 	$effect(() => {
-		if (gameState && gameState.phase === 'lobby' && !joined && roomState.connected && !isPresenter) {
+		if (
+			gameState &&
+			gameState.phase === 'lobby' &&
+			!joined &&
+			roomState.connected &&
+			!isPresenter
+		) {
 			joined = true;
 			sendJoin();
 		}
@@ -159,128 +169,137 @@
 </svelte:head>
 
 {#if gameState && gameState.phase === 'lobby'}
-		<LobbyView
-			{gameState}
-			{isPresenter}
-			{shareUrl}
-			{qrDataUrl}
-			{connectedPlayers}
-			onstart={() => setPhase('study')}
-		/>
+	<LobbyView
+		{gameState}
+		{isPresenter}
+		{qrDataUrl}
+		{connectedPlayers}
+		onstart={() => setPhase('study')}
+	/>
 
-		{#if !isPresenter}
-			<AvatarEditor bind:avatar bind:name {joined} onupdate={sendJoin} />
-		{/if}
-	{:else if gameState}
-		<section class="room-grid" class:presenter-mode={isPresenter}>
-			<div class="stage-panel">
-				<div class="room-header">
-					<div>
-						<p class="round-label">Round {gameState.round + 1} / {gameState.challenge.name}</p>
-						<h2>{gameState.challenge.prompt}</h2>
-					</div>
-					<div class="room-code">
-						<span>Room</span>
-						<strong>{gameState.roomCode}</strong>
-					</div>
+	{#if !isPresenter}
+		<AvatarEditor bind:avatar bind:name {joined} onupdate={sendJoin} />
+	{/if}
+{:else if gameState}
+	<section class="room-grid" class:presenter-mode={isPresenter}>
+		<div class="stage-panel">
+			<div class="room-header">
+				<div>
+					<p class="round-label">Round {gameState.round + 1} / {gameState.challenge.name}</p>
+					<h2>{gameState.challenge.prompt}</h2>
 				</div>
-
-				<div class="stage">
-					<div class="phase-stamp">{gameState.phase}</div>
-					{#if gameState.phase === 'reveal'}
-						<div class="drawing-grid">
-							{#each sortedPlayers as player (player.id)}
-								<article class="drawing-card">
-									{#if player.drawing}
-										<img src={player.drawing} alt={`${player.name}'s drawing`} />
-									{:else}
-										<div class="empty-drawing">No drawing yet</div>
-									{/if}
-									<div class="drawing-meta">
-										{#if player.avatar.drawing}
-											<img class="mini-avatar" src={player.avatar.drawing} alt={`${player.name}'s avatar`} />
-										{:else}
-											<div class="mini-avatar"></div>
-										{/if}
-										<strong>{player.name}</strong>
-										<span>{player.score} pts</span>
-									</div>
-									{#if isPresenter}
-										<div class="score-controls">
-											<button
-												class="icon-btn"
-												title="Remove point"
-												onclick={() => addScore(player.id, -1)}
-											>
-												-
-											</button>
-											<button
-												class="icon-btn"
-												title="Add point"
-												onclick={() => addScore(player.id, 1)}
-											>
-												+
-											</button>
-										</div>
-									{/if}
-								</article>
-							{/each}
-						</div>
-					{:else}
-						<div class={`shape-scene ${gameState.challenge.shape}`}>
-							<div class="shape-shadow"></div>
-							<div class="block block-a"></div>
-							<div class="block block-b"></div>
-							<div class="block block-c"></div>
-							<div class="block block-d"></div>
-							<div class="block block-e"></div>
-						</div>
-					{/if}
-				</div>
-
-				<p class="target-angle">{gameState.challenge.targetAngle}</p>
-
-				<div class="player-row">
-					{#each connectedPlayers as player (player.id)}
-						<div class="player-chip" class:done={player.done}>
-							{#if player.avatar.drawing}
-								<img class="avatar" src={player.avatar.drawing} alt={`${player.name}'s avatar`} />
-							{:else}
-								<div class="avatar"></div>
-							{/if}
-							<div>
-								<strong>{player.name}</strong>
-								<span>{player.score} pts{player.done ? ' - done' : ''}</span>
-							</div>
-						</div>
-					{/each}
+				<div class="room-code">
+					<span>Room</span>
+					<strong>{gameState.roomCode}</strong>
 				</div>
 			</div>
 
-			<aside class="control-panel">
-				{#if isPresenter}
-					<div class="sticker">
-						<p class="label-tag">Share link</p>
-						<input class="share-input" readonly value={shareUrl} />
-						<div class="presenter-actions">
-							<button class="btn grass" onclick={() => setPhase('study')}>Study</button>
-							<button class="btn coral" onclick={() => setPhase('draw')}>Draw</button>
-							<button class="btn grape" onclick={() => setPhase('reveal')}>Reveal</button>
-							<button class="btn sky" onclick={nextRound}>Next</button>
+			<div class="stage">
+				<div class="phase-stamp">{gameState.phase}</div>
+				{#if gameState.phase === 'reveal'}
+					<div class="drawing-grid">
+						{#each sortedPlayers as player (player.id)}
+							<article class="drawing-card">
+								{#if player.drawing}
+									<img src={player.drawing} alt={`${player.name}'s drawing`} />
+								{:else}
+									<div class="empty-drawing">No drawing yet</div>
+								{/if}
+								<div class="drawing-meta">
+									{#if player.avatar.drawing}
+										<img
+											class="mini-avatar"
+											src={player.avatar.drawing}
+											alt={`${player.name}'s avatar`}
+										/>
+									{:else}
+										<div class="mini-avatar"></div>
+									{/if}
+									<strong>{player.name}</strong>
+									<span>{player.score} pts</span>
+								</div>
+								{#if isPresenter}
+									<div class="score-controls">
+										<button
+											class="icon-btn"
+											title="Remove point"
+											onclick={() => addScore(player.id, -1)}
+										>
+											-
+										</button>
+										<button
+											class="icon-btn"
+											title="Add point"
+											onclick={() => addScore(player.id, 1)}
+										>
+											+
+										</button>
+									</div>
+								{/if}
+							</article>
+						{/each}
+					</div>
+				{:else}
+					<div class={`shape-scene ${gameState.challenge.shape}`}>
+						<div class="shape-shadow"></div>
+						<div class="block block-a"></div>
+						<div class="block block-b"></div>
+						<div class="block block-c"></div>
+						<div class="block block-d"></div>
+						<div class="block block-e"></div>
+					</div>
+				{/if}
+			</div>
+
+			<p class="target-angle">{gameState.challenge.targetAngle}</p>
+
+			<div class="player-row">
+				{#each connectedPlayers as player (player.id)}
+					<div class="player-chip" class:done={player.done}>
+						{#if player.avatar.drawing}
+							<img class="avatar" src={player.avatar.drawing} alt={`${player.name}'s avatar`} />
+						{:else}
+							<div class="avatar"></div>
+						{/if}
+						<div>
+							<strong>{player.name}</strong>
+							<span>{player.score} pts{player.done ? ' - done' : ''}</span>
 						</div>
 					</div>
-				{:else if joined}
-					<AvatarEditor bind:avatar bind:name {joined} onupdate={sendJoin} />
+				{/each}
+			</div>
+		</div>
 
-					<DrawingCanvas
-						self={self}
-						{send}
-						label={gameState.phase === 'draw' ? gameState.challenge.targetAngle : 'Drawing pad'}
-					/>
-				{:else}
-					<AvatarEditor bind:avatar bind:name {joined} onupdate={sendJoin} label="Customize your player" />
-					<button class="btn grass full" onclick={joinGame}>Join Game</button>
-				{/if}
-			</aside>
-		</section>
-	{/if}
+		<aside class="control-panel">
+			{#if isPresenter}
+				<div class="sticker">
+					<p class="label-tag">Share link</p>
+					<input class="share-input" readonly value={shareUrl} />
+					<div class="presenter-actions">
+						<button class="btn grass" onclick={() => setPhase('study')}>Study</button>
+						<button class="btn coral" onclick={() => setPhase('draw')}>Draw</button>
+						<button class="btn grape" onclick={() => setPhase('reveal')}>Reveal</button>
+						<button class="btn sky" onclick={nextRound}>Next</button>
+					</div>
+				</div>
+			{:else if joined}
+				<AvatarEditor bind:avatar bind:name {joined} onupdate={sendJoin} />
+
+				<DrawingCanvas
+					{self}
+					{send}
+					label={gameState.phase === 'draw' ? gameState.challenge.targetAngle : 'Drawing pad'}
+				/>
+			{:else}
+				<AvatarEditor
+					bind:avatar
+					bind:name
+					{joined}
+					onupdate={sendJoin}
+					label="Customize your player"
+				/>
+				<button class="btn grass full" onclick={joinGame}>Join Game</button>
+			{/if}
+		</aside>
+	</section>
+{/if}
