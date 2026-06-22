@@ -1,10 +1,14 @@
 <script lang="ts">
 	let {
 		initialDrawing = '',
+		avatar = false,
+		disabled = false,
 		onupdate = () => {},
 		oninstant = () => {}
 	}: {
 		initialDrawing?: string;
+		avatar?: boolean;
+		disabled?: boolean;
 		onupdate?: (url: string) => void;
 		oninstant?: (url: string) => void;
 	} = $props();
@@ -64,7 +68,7 @@
 	}
 
 	function startStroke(event: PointerEvent) {
-		if (!avatarCanvas) return;
+		if (!avatarCanvas || disabled) return;
 		undoStack.push(avatarCanvas.toDataURL('image/png'));
 		avatarCanvas.setPointerCapture(event.pointerId);
 		drawing = true;
@@ -104,6 +108,7 @@
 	}
 
 	function clearCanvas() {
+		if (disabled) return;
 		const context = avatarCanvas?.getContext('2d');
 		if (!context || !avatarCanvas) return;
 		undoStack.push(avatarCanvas.toDataURL('image/png'));
@@ -114,6 +119,7 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
+		if (disabled) return;
 		if ((event.metaKey || event.ctrlKey) && event.key === 'z') {
 			event.preventDefault();
 			undo();
@@ -127,7 +133,7 @@
 	});
 
 	function undo() {
-		if (undoStack.length === 0) return;
+		if (disabled || undoStack.length === 0) return;
 		const url = undoStack.pop();
 		if (!url) return;
 		const context = avatarCanvas?.getContext('2d');
@@ -142,9 +148,10 @@
 	}
 </script>
 
-<div class="flex justify-center mt-2 mb-4">
+<div class="flex justify-center mt-2 mb-4 {disabled ? 'opacity-40' : ''}">
 	<div
-		class="ink flex relative items-center justify-center shrink-0 w-full aspect-square blob1 bg-coral overflow-clip"
+		class="ink flex relative items-center justify-center shrink-0 w-full aspect-square bg-coral overflow-clip {avatar &&
+			'blob1'} {disabled ? 'pointer-events-none' : ''}"
 		id="ccPreview"
 	>
 		<div class="size-full overflow-clip">
@@ -159,7 +166,7 @@
 		</div>
 	</div>
 </div>
-<div class="flex items-center gap-2 mt-4 justify-center flex-wrap">
+<div class="flex items-center gap-2 mt-4 justify-center flex-wrap {disabled ? 'opacity-40 pointer-events-none' : ''}">
 	{#each palette as color (color)}
 		<button
 			class="size-7 rounded-full border-3 border-ink cursor-pointer {brushColor === color &&
@@ -170,7 +177,7 @@
 		></button>
 	{/each}
 </div>
-<div class="flex items-center gap-2 my-2.5 justify-center flex-wrap">
+<div class="flex items-center gap-2 my-2.5 justify-center flex-wrap {disabled ? 'opacity-40 pointer-events-none' : ''}">
 	<button
 		class="size-10 border-3 border-ink cursor-pointer rounded-xl flex items-center justify-center text-3xl bg-white"
 		class:bg-yellow={brushSize === thinSize}
@@ -188,12 +195,13 @@
 	<button
 		class="size-10 border-3 border-ink cursor-pointer rounded-xl flex items-center justify-center text-3xl bg-white disabled:opacity-50"
 		onclick={undo}
-		disabled={undoStack.length === 0}
+		disabled={undoStack.length === 0 || disabled}
 		title="undo">↺</button
 	>
 	<button
 		class="size-10 border-3 border-ink cursor-pointer rounded-xl flex items-center justify-center text-2xl bg-white"
 		onclick={clearCanvas}
+		disabled={disabled}
 		title="clear">⌫</button
 	>
 </div>

@@ -1,4 +1,4 @@
-export type Phase = 'lobby' | 'study' | 'draw' | 'reveal' | 'vote';
+export type Phase = 'lobby' | 'study' | 'draw' | 'reveal';
 
 export type Avatar = {
 	drawing: string;
@@ -109,4 +109,24 @@ const defaultNames = ['Squiggle', 'Doodle', 'Wobble', 'Noodle', 'Zigzag', 'Pebbl
 export function sanitizeName(name: string) {
 	const clean = name.trim().replace(/\s+/g, ' ').slice(0, 18);
 	return clean || defaultNames[Math.floor(Math.random() * defaultNames.length)];
+}
+
+export function getTimeRemaining(phase: Phase, startedAt: number, now?: number) {
+	now ??= Date.now();
+	let duration = 0;
+	switch (phase) {
+		case 'study':
+			duration = STUDY_DURATION;
+			break;
+		case 'draw':
+			duration = DRAW_DURATION;
+			break;
+		default:
+			break;
+	}
+	const remaining = Math.max(0, duration * 1000 - (now - startedAt));
+	const totalSeconds = Math.ceil(remaining / 1000);
+	const m = Math.floor(totalSeconds / 60);
+	const s = totalSeconds % 60;
+	return `${m}:${s.toString().padStart(2, '0')}`;
 }

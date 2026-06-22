@@ -1,27 +1,24 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { SvelteURL } from 'svelte/reactivity';
-	import QRCode from 'qrcode';
-	import { roomState } from '$lib/room.svelte';
+	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
+	import BlobAvatar from '$lib/components/BlobAvatar.svelte';
+	import PhoneDraw from '$lib/components/PhoneDraw.svelte';
+	import PresenterScene from '$lib/components/PresenterScene.svelte';
 	import {
-		STUDY_DURATION,
 		DRAW_DURATION,
 		makeAvatar,
 		sanitizeName,
+		STUDY_DURATION,
 		type Avatar,
 		type Phase
 	} from '$lib/game';
-	import BlobAvatar from '$lib/components/BlobAvatar.svelte';
-	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
-	import LobbyView from '$lib/components/LobbyView.svelte';
-	import PhoneDraw from '$lib/components/PhoneDraw.svelte';
-	import PhoneLobby from '$lib/components/PhoneLobby.svelte';
-	import PresenterScene from '$lib/components/PresenterScene.svelte';
+	import { roomState } from '$lib/room.svelte';
+	import QRCode from 'qrcode';
+	import { onMount } from 'svelte';
+	import { SvelteURL } from 'svelte/reactivity';
 
 	let name = $state('');
 	let avatar = $state<Avatar>(makeAvatar());
 	let shareUrl = $state('');
-	let qrDataUrl = $state('');
 	let joined = $state(false);
 
 	let audioContext: AudioContext | null = null;
@@ -31,12 +28,7 @@
 	let gameState = $derived(roomState.gameState);
 
 	let timerLabel = $derived.by(() => {
-		if (
-			gameState.phase === 'lobby' ||
-			gameState.phase === 'reveal' ||
-			gameState.phase === 'vote'
-		)
-			return '';
+		if (gameState.phase === 'lobby' || gameState.phase === 'reveal') return '';
 		const total = gameState.phase === 'study' ? STUDY_DURATION : DRAW_DURATION;
 		const remaining = Math.max(0, total - timer);
 		const m = Math.floor(remaining / 60);
@@ -159,139 +151,117 @@
 	}
 </script>
 
-{#if gameState.phase === 'lobby'}
-	{#if isPresenter}
-		<LobbyView
-			{gameState}
-			{isPresenter}
-			{qrDataUrl}
-			{connectedPlayers}
-			onstart={() => setPhase('study')}
-		/>
-	{:else}
-		<PhoneLobby {gameState} bind:avatar bind:name {joined} {connectedPlayers} onupdate={sendJoin} />
-	{/if}
-{:else}
-	<section class="room-grid" class:presenter-mode={isPresenter}>
-		<div class="stage-panel">
-			<div class="room-header">
-				<div class="question-banner">
-					<span class="round-label">Round {gameState.round + 1} / {gameState.challenge.name}</span>
-					<h2>{gameState.challenge.prompt}</h2>
-				</div>
-				<div class="room-code">
-					<span>Room</span>
-					<strong>{gameState.roomCode}</strong>
-				</div>
+<section class="room-grid" class:presenter-mode={isPresenter}>
+	<div class="stage-panel">
+		<div class="room-header">
+			<div class="question-banner">
+				<span class="round-label">Round {gameState.round + 1} / {gameState.challenge.name}</span>
+				<h2>{gameState.challenge.prompt}</h2>
 			</div>
-
-			<div class="stage">
-				{#if gameState.phase === 'reveal' || gameState.phase === 'vote'}
-					<div class="drawing-grid">
-						{#each sortedPlayers as player (player.id)}
-							<article class="drawing-card">
-								{#if player.drawing}
-									<img src={player.drawing} alt={`${player.name}'s drawing`} />
-								{:else}
-									<div class="empty-drawing">No drawing yet</div>
-								{/if}
-								<div class="drawing-meta">
-									<BlobAvatar src={player.avatar.drawing} size={38} blob={1} />
-									<strong>{player.name}</strong>
-									<span>{player.score} pts</span>
-								</div>
-								{#if isPresenter}
-									<div class="score-controls">
-										<button
-											class="icon-btn"
-											title="Remove point"
-											onclick={() => addScore(player.id, -1)}
-										>
-											-
-										</button>
-										<button
-											class="icon-btn"
-											title="Add point"
-											onclick={() => addScore(player.id, 1)}
-										>
-											+
-										</button>
-									</div>
-								{/if}
-							</article>
-						{/each}
-					</div>
-				{:else if isPresenter}
-					<div class="scene-wrap">
-						<PresenterScene
-							model={gameState.challenge.model}
-							phase={gameState.phase}
-							{timerLabel}
-						/>
-					</div>
-				{/if}
-			</div>
-
-			<p class="target-angle">{gameState.challenge.targetAngle}</p>
-
-			<div class="player-row">
-				{#each connectedPlayers as player, i (player.id)}
-					<div class="player-chip" class:done={player.done}>
-						<BlobAvatar src={player.avatar.drawing} size={42} blob={([1, 2, 3] as const)[i % 3]} />
-						<div class="player-info">
-							<strong>{player.name}</strong>
-							<div class="player-status">
-								{#if player.done}
-									<span class="done-badge-sm">✓</span>
-								{:else if gameState.phase === 'draw'}
-									<span class="drawing-label">drawing…</span>
-								{/if}
-							</div>
-						</div>
-						{#if gameState.phase === 'draw' && isPresenter && player.drawing}
-							<img class="mini-drawing" src={player.drawing} alt={`${player.name}'s drawing`} />
-						{/if}
-					</div>
-				{/each}
+			<div class="room-code">
+				<span>Room</span>
+				<strong>{gameState.roomCode}</strong>
 			</div>
 		</div>
 
-		<aside class="control-panel">
-			{#if isPresenter}
-				<div class="sticker">
-					<p class="label-tag">Controls</p>
-					{#if gameState.phase === 'study' || gameState.phase === 'draw'}
-						<p class="timer-label">{timerLabel} remaining</p>
-					{:else if gameState.phase === 'reveal'}
-						<div class="presenter-actions">
-							<button class="btn sky" onclick={nextRound}>Next Round</button>
+		<div class="stage">
+			{#if gameState.phase === 'reveal'}
+				<div class="drawing-grid">
+					{#each sortedPlayers as player (player.id)}
+						<article class="drawing-card">
+							{#if player.drawing}
+								<img src={player.drawing} alt={`${player.name}'s drawing`} />
+							{:else}
+								<div class="empty-drawing">No drawing yet</div>
+							{/if}
+							<div class="drawing-meta">
+								<BlobAvatar src={player.avatar.drawing} size={38} blob={1} />
+								<strong>{player.name}</strong>
+								<span>{player.score} pts</span>
+							</div>
+							{#if isPresenter}
+								<div class="score-controls">
+									<button
+										class="icon-btn"
+										title="Remove point"
+										onclick={() => addScore(player.id, -1)}
+									>
+										-
+									</button>
+									<button class="icon-btn" title="Add point" onclick={() => addScore(player.id, 1)}>
+										+
+									</button>
+								</div>
+							{/if}
+						</article>
+					{/each}
+				</div>
+			{:else if isPresenter}
+				<div class="scene-wrap">
+					<PresenterScene model={gameState.challenge.model} phase={gameState.phase} {timerLabel} />
+				</div>
+			{/if}
+		</div>
+
+		<p class="target-angle">{gameState.challenge.targetAngle}</p>
+
+		<div class="player-row">
+			{#each connectedPlayers as player, i (player.id)}
+				<div class="player-chip" class:done={player.done}>
+					<BlobAvatar src={player.avatar.drawing} size={42} blob={([1, 2, 3] as const)[i % 3]} />
+					<div class="player-info">
+						<strong>{player.name}</strong>
+						<div class="player-status">
+							{#if player.done}
+								<span class="done-badge-sm">✓</span>
+							{:else if gameState.phase === 'draw'}
+								<span class="drawing-label">drawing…</span>
+							{/if}
 						</div>
+					</div>
+					{#if gameState.phase === 'draw' && isPresenter && player.drawing}
+						<img class="mini-drawing" src={player.drawing} alt={`${player.name}'s drawing`} />
 					{/if}
 				</div>
-			{:else if joined && gameState.phase === 'draw'}
-				<PhoneDraw
-					{self}
-					players={gameState.players}
-					prompt={gameState.challenge.targetAngle}
-					{timerLabel}
-					send={roomState.send.bind(roomState)}
-				/>
-			{:else if joined}
-				<div class="phase-waiting">
-					<p class="waiting-text">
-						{gameState.phase === 'study' ? 'Study the shape…' : 'Waiting…'}
-					</p>
-				</div>
-			{:else}
-				<AvatarEditor
-					bind:avatar
-					bind:name
-					{joined}
-					onupdate={sendJoin}
-					label="Customize your player"
-				/>
-				<button class="btn grass full" onclick={joinGame}>Join Game</button>
-			{/if}
-		</aside>
-	</section>
-{/if}
+			{/each}
+		</div>
+	</div>
+
+	<aside class="control-panel">
+		{#if isPresenter}
+			<div class="sticker">
+				<p class="label-tag">Controls</p>
+				{#if gameState.phase === 'study' || gameState.phase === 'draw'}
+					<p class="timer-label">{timerLabel} remaining</p>
+				{:else if gameState.phase === 'reveal'}
+					<div class="presenter-actions">
+						<button class="btn sky" onclick={nextRound}>Next Round</button>
+					</div>
+				{/if}
+			</div>
+		{:else if joined && gameState.phase === 'draw'}
+			<PhoneDraw
+				{self}
+				players={gameState.players}
+				prompt={gameState.challenge.targetAngle}
+				{timerLabel}
+				send={roomState.send.bind(roomState)}
+			/>
+		{:else if joined}
+			<div class="phase-waiting">
+				<p class="waiting-text">
+					{gameState.phase === 'study' ? 'Study the shape…' : 'Waiting…'}
+				</p>
+			</div>
+		{:else}
+			<AvatarEditor
+				bind:avatar
+				bind:name
+				{joined}
+				onupdate={sendJoin}
+				label="Customize your player"
+			/>
+			<button class="btn grass full" onclick={joinGame}>Join Game</button>
+		{/if}
+	</aside>
+</section>

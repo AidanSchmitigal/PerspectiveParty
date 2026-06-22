@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+
 	let { children } = $props();
 </script>
 
@@ -9,18 +11,20 @@
 	<span class="confetti" style="top: 60px; left: 30%; animation-delay: 0.8s">🎈</span>
 
 	<div class="text-center">
-		<h1 class="squiggle-underline text-4xl mb-1.5">
-			Doodle Party
-			<svg viewBox="0 0 200 10" preserveAspectRatio="none"
-				><path
-					d="M0,6 Q10,0 20,6 T40,6 T60,6 T80,6 T100,6 T120,6 T140,6 T160,6 T180,6 T200,6"
-					stroke="#ff6b5b"
-					stroke-width="4"
-					fill="none"
-					stroke-linecap="round"
-				></path></svg
-			>
-		</h1>
+		<a href={resolve('/')}>
+			<h1 class="squiggle-underline text-4xl mb-1.5">
+				Doodle Party
+				<svg viewBox="0 0 200 10" preserveAspectRatio="none"
+					><path
+						d="M0,6 Q10,0 20,6 T40,6 T60,6 T80,6 T100,6 T120,6 T140,6 T160,6 T180,6 T200,6"
+						stroke="#ff6b5b"
+						stroke-width="4"
+						fill="none"
+						stroke-linecap="round"
+					></path></svg
+				>
+			</h1>
+		</a>
 	</div>
 
 	{@render children()}

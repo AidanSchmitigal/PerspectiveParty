@@ -16,7 +16,6 @@ const PORT = parseInt(process.env.PORT || '3001', 10);
 class GameRoom {
 	state: GameState;
 	private connections = new Map<string, WebSocket>();
-	destroyed = false;
 
 	constructor(roomCode: string) {
 		this.state = {
@@ -45,15 +44,8 @@ class GameRoom {
 	removeConnection(id: string) {
 		this.connections.delete(id);
 
-		if (id === this.state.presenterId && !this.destroyed) {
-			this.destroyed = true;
-			for (const [, ws] of this.connections) {
-				ws.close(1000, 'Presenter disconnected');
-			}
-			this.state.players = [];
+		if (id === this.state.presenterId) {
 			this.state.presenterId = null;
-			this.broadcastState();
-			return;
 		}
 
 		const wasPlayer = this.state.players.some((p) => p.id === id);
@@ -226,7 +218,7 @@ wss.on('connection', (ws, req) => {
 
 	ws.on('close', () => {
 		room?.removeConnection(id);
-		if (room?.isEmpty || room?.destroyed) {
+		if (room?.isEmpty) {
 			rooms.delete(roomCode);
 		}
 	});

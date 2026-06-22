@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { makeRoomCode } from '$lib/game';
-	import TitleFrame from './TitleFrame.svelte';
+	import TitleFrame from '../lib/components/TitleFrame.svelte';
 
 	let roomInput = $state('');
 

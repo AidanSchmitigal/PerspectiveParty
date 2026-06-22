@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { roomState } from '$lib/room.svelte';
 
-	import Player from './Player.svelte';
-	import Presenter from './Presenter.svelte';
+	import Player from '$lib/player/Player.svelte';
+	import Presenter from '$lib/presenter/Presenter.svelte';
 
 	let isPresenter = $derived(roomState.gameState.presenterId === roomState.selfId);
 </script>
