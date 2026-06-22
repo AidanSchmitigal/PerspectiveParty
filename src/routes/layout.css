@@ -158,3 +158,8 @@ label {
 	text-align: center;
 	margin: 10px 0 6px;
 }
+
+canvas {
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+}

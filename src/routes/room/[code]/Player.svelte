@@ -2,28 +2,24 @@
 	import DrawingCanvas from '$lib/components/DrawingCanvas.svelte';
 	import { makeAvatar, sanitizeName, type Avatar } from '$lib/game';
 	import { roomState } from '$lib/room.svelte';
+	import { onMount } from 'svelte';
 
 	let name = $state('');
 	let avatar = $state<Avatar>(makeAvatar());
 
-	$effect(() => {
-		if (roomState.gameState.phase === 'lobby' && roomState.connected) {
-			sendJoin();
-		}
-	});
-
-	$effect(() => {
-		void name;
-		sendJoin();
-	});
-
-	function sendJoin() {
+	onMount(() => {
 		const cleanName = sanitizeName(name || localStorage.getItem('perspective-party-name') || '');
 		name = cleanName;
 		localStorage.setItem('perspective-party-name', cleanName);
 		localStorage.setItem('perspective-party-avatar', JSON.stringify(avatar));
-		roomState.send({ type: 'join', name: cleanName, avatar });
-	}
+
+		roomState.send({ type: 'join', name, avatar });
+	});
+
+	$effect(() => {
+		localStorage.setItem('perspective-party-name', name);
+		roomState.send({ type: 'set-player', name });
+	});
 </script>
 
 {#if roomState.gameState.phase == 'lobby'}
@@ -34,9 +30,14 @@
 
 			<DrawingCanvas
 				initialDrawing={avatar.drawing}
+				oninstant={(url) => {
+					avatar.drawing = url;
+					roomState.send({ type: 'set-player', avatar });
+				}}
 				onupdate={(url) => {
 					avatar.drawing = url;
-					sendJoin();
+					localStorage.setItem('perspective-party-avatar', JSON.stringify(avatar));
+					roomState.send({ type: 'set-player', avatar });
 				}}
 			/>
 

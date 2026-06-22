@@ -61,7 +61,7 @@
 						{:else if player.avatar.drawing}
 							<img src={player.avatar.drawing} alt={`${player.name}'s drawing`} />
 						{:else}
-							<div class="size-full bg-sky"></div>
+							<div class="size-full bg-white"></div>
 						{/if}
 					</div>
 					<div

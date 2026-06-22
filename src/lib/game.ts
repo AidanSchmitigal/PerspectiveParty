@@ -36,7 +36,7 @@ export type GameState = {
 
 export type ClientMessage =
 	| { type: 'join'; name: string; avatar: Avatar }
-	| { type: 'set-player'; name: string; avatar: Avatar }
+	| { type: 'set-player'; name?: string; avatar?: Avatar }
 	| { type: 'phase'; phase: Phase }
 	| { type: 'next-round' }
 	| { type: 'drawing'; dataUrl: string }

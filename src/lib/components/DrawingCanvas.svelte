@@ -1,25 +1,25 @@
 <script lang="ts">
-	import { throttle } from '$lib';
-
 	let {
 		initialDrawing = '',
-		onupdate = () => {}
+		onupdate = () => {},
+		oninstant = () => {}
 	}: {
 		initialDrawing?: string;
 		onupdate?: (url: string) => void;
+		oninstant?: (url: string) => void;
 	} = $props();
 
-	let throttledUpdate = $derived(throttle(onupdate, 500));
-
 	const palette = ['#3a332c', '#ff6b5b', '#52bfee', '#7bc95e', '#b083e8', '#ffc83d', '#fffef9'];
-	const thinSize = 12;
-	const thickSize = 18;
+	const thinSize = 6;
+	const thickSize = 12;
+	const CANVAS_WIDTH = 100;
 
 	let avatarCanvas = $state<HTMLCanvasElement>();
 	let brushColor = $state(palette[0]);
 	let brushSize = $state(thickSize);
 	let drawing = false;
 	let lastPoint: { x: number; y: number } | null = null;
+	let sendTimer: ReturnType<typeof setTimeout> | null = null;
 	let undoStack: string[] = $state([]);
 
 	function prepareCanvas(node: HTMLCanvasElement) {
@@ -33,20 +33,23 @@
 	}
 
 	function resetCanvas(node: HTMLCanvasElement) {
-		const rect = node.getBoundingClientRect();
-		const scale = window.devicePixelRatio || 1;
-		node.width = Math.floor(rect.width * scale);
-		node.height = Math.floor(rect.width * scale);
+		node.width = CANVAS_WIDTH;
+		node.height = CANVAS_WIDTH;
+
 		const context = node.getContext('2d');
 		if (!context) return;
-		context.scale(scale, scale);
+		context.imageSmoothingEnabled = false;
+		// @ts-expect-error - mozilla
+		context.mozImageSmoothingEnabled = false;
+		// @ts-expect-error - webkit
+		context.webkitImageSmoothingEnabled = false;
 		context.lineCap = 'round';
 		context.lineJoin = 'round';
 		context.fillStyle = '#fffef9';
-		context.fillRect(0, 0, rect.width, rect.width);
+		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_WIDTH);
 		if (initialDrawing) {
 			const image = new Image();
-			image.onload = () => context.drawImage(image, 0, 0, rect.width, rect.width);
+			image.onload = () => context.drawImage(image, 0, 0, CANVAS_WIDTH, CANVAS_WIDTH);
 			image.src = initialDrawing;
 		}
 	}
@@ -54,12 +57,15 @@
 	function pointFromEvent(event: PointerEvent) {
 		if (!avatarCanvas) return { x: 0, y: 0 };
 		const rect = avatarCanvas.getBoundingClientRect();
-		return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+		return {
+			x: (event.clientX - rect.left) * (CANVAS_WIDTH / rect.width),
+			y: (event.clientY - rect.top) * (CANVAS_WIDTH / rect.height)
+		};
 	}
 
 	function startStroke(event: PointerEvent) {
 		if (!avatarCanvas) return;
-		undoStack.push(avatarCanvas.toDataURL('image/webp', 0.68));
+		undoStack.push(avatarCanvas.toDataURL('image/png'));
 		avatarCanvas.setPointerCapture(event.pointerId);
 		drawing = true;
 		lastPoint = pointFromEvent(event);
@@ -77,7 +83,7 @@
 		context.lineTo(point.x, point.y);
 		context.stroke();
 		lastPoint = point;
-		throttledUpdate(avatarCanvas.toDataURL('image/webp', 0.68));
+		queueCanvasSend();
 	}
 
 	function endStroke(event: PointerEvent) {
@@ -85,17 +91,26 @@
 		drawing = false;
 		lastPoint = null;
 		avatarCanvas.releasePointerCapture(event.pointerId);
-		throttledUpdate(avatarCanvas.toDataURL('image/webp', 0.68));
+		onupdate(avatarCanvas.toDataURL('image/png'));
+	}
+
+	function queueCanvasSend() {
+		if (sendTimer) return;
+		sendTimer = setTimeout(() => {
+			if (!avatarCanvas) return;
+			oninstant(avatarCanvas.toDataURL('image/png'));
+			sendTimer = null;
+		}, 250);
 	}
 
 	function clearCanvas() {
 		const context = avatarCanvas?.getContext('2d');
 		if (!context || !avatarCanvas) return;
-		undoStack.push(avatarCanvas.toDataURL('image/webp', 0.68));
+		undoStack.push(avatarCanvas.toDataURL('image/png'));
 		const rect = avatarCanvas.getBoundingClientRect();
 		context.fillStyle = '#fffef9';
 		context.fillRect(0, 0, rect.width, rect.height);
-		throttledUpdate('');
+		onupdate('');
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -117,12 +132,11 @@
 		if (!url) return;
 		const context = avatarCanvas?.getContext('2d');
 		if (!context || !avatarCanvas) return;
-		const rect = avatarCanvas.getBoundingClientRect();
-		context.clearRect(0, 0, rect.width, rect.height);
+		context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_WIDTH);
 		const img = new Image();
 		img.onload = () => {
-			context.drawImage(img, 0, 0, rect.width, rect.width);
-			throttledUpdate(url);
+			context.drawImage(img, 0, 0, CANVAS_WIDTH, CANVAS_WIDTH);
+			onupdate(url);
 		};
 		img.src = url;
 	}

@@ -138,19 +138,18 @@ class GameRoom {
 		};
 	}
 
-	private upsertPlayer(id: string, name: string, avatar: Avatar) {
-		const cleanName = sanitizeName(name);
+	private upsertPlayer(id: string, name?: string, avatar?: Avatar) {
 		const existing = this.state.players.find((player) => player.id === id);
 		if (existing) {
-			existing.name = cleanName;
-			existing.avatar = avatar;
+			if (name !== undefined) existing.name = sanitizeName(name);
+			if (avatar !== undefined) existing.avatar = avatar;
 			existing.connected = true;
 			return;
 		}
 		this.state.players.push({
 			id,
-			name: cleanName,
-			avatar,
+			name: name !== undefined ? sanitizeName(name) : sanitizeName(''),
+			avatar: avatar ?? { drawing: '' },
 			score: 0,
 			connected: true,
 			joinedAt: Date.now()
@@ -171,12 +170,23 @@ class GameRoom {
 		this.state.updatedAt = Date.now();
 	}
 
+	private broadcastTimer: ReturnType<typeof setTimeout> | null = null;
+	private static readonly BROADCAST_INTERVAL_MS = 80;
+
 	private broadcastState() {
+		if (this.broadcastTimer) return;
+		this.broadcastTimer = setTimeout(() => {
+			this.broadcastTimer = null;
+			this.flushState();
+		}, GameRoom.BROADCAST_INTERVAL_MS);
+	}
+
+	private flushState() {
 		const payload = JSON.stringify({ type: 'state', state: this.state } satisfies ServerMessage);
 		for (const ws of this.connections.values()) {
-			if (ws.readyState === WebSocket.OPEN) {
-				ws.send(payload);
-			}
+			if (ws.readyState !== WebSocket.OPEN) continue;
+			if (ws.bufferedAmount > 10_000) continue;
+			ws.send(payload);
 		}
 	}
 }
