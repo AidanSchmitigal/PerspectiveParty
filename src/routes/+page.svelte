@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { makeRoomCode } from '$lib/game';
+	import TitleFrame from './TitleFrame.svelte';
 
 	let roomInput = $state('');
 
@@ -14,7 +15,7 @@
 		const code = roomInput
 			.trim()
 			.toUpperCase()
-			.replace(/[^A-Z0-9]/g, '')
+			.replace(/[^A-Z]/g, '')
 			.slice(0, 8);
 		if (!code) return;
 		goto(resolve(`/room/${code}`));
@@ -26,27 +27,21 @@
 	<meta name="description" content="A Jackbox-like spatial reasoning drawing game." />
 </svelte:head>
 
-<section class="flex flex-col">
-	<div class="flex">
-		<button class="btn coral" onclick={createRoom}>Create room</button>
-		<div class="join-box">
+<TitleFrame>
+	<div class="mt-6 flex gap-4 flex-col text-center items-center">
+		<button class="btn coral text-xl" onclick={createRoom}>create room ▶</button>
+		<div class="flex gap-4">
 			<input
-				class="name-input"
+				type="text"
 				placeholder="ROOM"
+				autocorrect="off"
+				autocapitalize="off"
+				autocomplete="off"
+				class="uppercase"
 				bind:value={roomInput}
 				onkeydown={(event) => event.key === 'Enter' && joinRoom()}
 			/>
-			<button class="btn sky" onclick={joinRoom}>Join</button>
+			<button class="btn sky" onclick={joinRoom}>join</button>
 		</div>
 	</div>
-	<div class="mini-scene" aria-label="Spinning cube preview">
-		<div class="cube cube-large">
-			<div class="face front">?</div>
-			<div class="face back"></div>
-			<div class="face right"></div>
-			<div class="face left"></div>
-			<div class="face top"></div>
-			<div class="face bottom"></div>
-		</div>
-	</div>
-</section>
+</TitleFrame>

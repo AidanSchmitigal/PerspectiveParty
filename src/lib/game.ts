@@ -1,4 +1,4 @@
-export type Phase = 'lobby' | 'study' | 'draw' | 'reveal';
+export type Phase = 'lobby' | 'study' | 'draw' | 'reveal' | 'vote';
 
 export type Avatar = {
 	drawing: string;
@@ -20,7 +20,7 @@ export type Challenge = {
 	name: string;
 	prompt: string;
 	targetAngle: string;
-	shape: 'cube' | 'stairs' | 'tower' | 'bridge';
+	model: string;
 };
 
 export type GameState = {
@@ -31,6 +31,7 @@ export type GameState = {
 	challenge: Challenge;
 	players: Player[];
 	updatedAt: number;
+	phaseStartedAt: number;
 };
 
 export type ClientMessage =
@@ -46,39 +47,52 @@ export type ClientMessage =
 
 export type ServerMessage = { type: 'state'; state: GameState } | { type: 'hello'; id: string };
 
-export const challenges: Challenge[] = [
-	{
-		id: 'corner-cube',
-		name: 'Corner Cube',
-		prompt: 'Memorize the colored faces, then draw it from above-left.',
-		targetAngle: 'Draw the view from above-left',
-		shape: 'cube'
-	},
-	{
-		id: 'stacky-stairs',
-		name: 'Stacky Stairs',
-		prompt: 'Watch the block staircase rotate. Keep track of the tall side.',
-		targetAngle: 'Draw the view from the right side',
-		shape: 'stairs'
-	},
-	{
-		id: 'button-tower',
-		name: 'Button Tower',
-		prompt: 'Notice which blocks stick out before it spins away.',
-		targetAngle: 'Draw the view from behind',
-		shape: 'tower'
-	},
-	{
-		id: 'wonky-bridge',
-		name: 'Wonky Bridge',
-		prompt: 'Track the gap under the bridge and the cap colors.',
-		targetAngle: 'Draw the view from below-right',
-		shape: 'bridge'
-	}
+const modelNames = [
+	'01',
+	'02',
+	'03',
+	'04',
+	'05',
+	'06',
+	'07',
+	'08',
+	'09',
+	'10',
+	'11',
+	'12',
+	'13',
+	'14',
+	'15',
+	'16',
+	'17',
+	'18',
+	'19',
+	'20',
+	'21',
+	'22',
+	'23',
+	'24',
+	'25',
+	'26',
+	'27',
+	'28',
+	'29',
+	'30'
 ];
 
+export const challenges: Challenge[] = modelNames.map((name) => ({
+	id: `model-${name}`,
+	name: `Shape ${name}`,
+	prompt: 'Study the 3D shape from every angle.',
+	targetAngle: 'Draw the view from above-left',
+	model: `/models/${name}.glb`
+}));
+
+export const STUDY_DURATION = 10;
+export const DRAW_DURATION = 60;
+
 export function makeRoomCode() {
-	const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+	const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 	let code = '';
 	for (let index = 0; index < 4; index += 1) {
 		code += alphabet[Math.floor(Math.random() * alphabet.length)];
@@ -90,9 +104,9 @@ export function makeAvatar() {
 	return { drawing: '' } satisfies Avatar;
 }
 
+const defaultNames = ['Squiggle', 'Doodle', 'Wobble', 'Noodle', 'Zigzag', 'Pebble'];
+
 export function sanitizeName(name: string) {
 	const clean = name.trim().replace(/\s+/g, ' ').slice(0, 18);
-	return clean || `Player ${Math.floor(Math.random() * 90) + 10}`;
+	return clean || defaultNames[Math.floor(Math.random() * defaultNames.length)];
 }
-
-

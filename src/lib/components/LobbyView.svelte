@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BlobAvatar from '$lib/components/BlobAvatar.svelte';
 	import { type GameState, type Player } from '$lib/game';
 
 	let {
@@ -17,7 +18,6 @@
 
 	let playerCount: number = $derived(connectedPlayers.length);
 
-	// Simple deterministic "color" and "face" from player id so it matches the DESIGN.html blob style
 	function playerColor(index: number): string {
 		const colors = [
 			'var(--coral)',
@@ -30,14 +30,8 @@
 		return colors[index % colors.length];
 	}
 
-	function playerEmoji(index: number): string {
-		const emojis = ['😺', '🐸', '🦊', '🐼', '🐙', '🐝'];
-		return emojis[index % emojis.length];
-	}
-
-	function blobClass(index: number): string {
-		const classes = ['blob1', 'blob2', 'blob3'];
-		return classes[index % classes.length];
+	function blobIndex(index: number): 1 | 2 | 3 {
+		return ([1, 2, 3] as const)[index % 3];
 	}
 </script>
 
@@ -78,19 +72,18 @@
 	<div class="player-grid">
 		{#each connectedPlayers as player, i (player.id)}
 			<div class="player-tile">
-				<div class="avatar {blobClass(i)}" style="background: {playerColor(i)}">
-					{#if player.avatar.drawing}
-						<img class="avatar-img" src={player.avatar.drawing} alt={player.name} />
-					{:else}
-						{playerEmoji(i)}
-					{/if}
-				</div>
+				<BlobAvatar
+					src={player.avatar.drawing}
+					size={54}
+					blob={blobIndex(i)}
+					background={playerColor(i)}
+				/>
 				<div class="avatar-name">{player.name}</div>
 			</div>
 		{/each}
 		{#if connectedPlayers.length === 0}
 			<div class="player-tile">
-				<div class="avatar blob1" style="background: #fff; border-style: dashed">…</div>
+				<BlobAvatar size={54} blob={1} background="#fff" />
 				<div class="avatar-name">waiting</div>
 			</div>
 		{/if}
@@ -98,7 +91,7 @@
 
 	{#if isPresenter}
 		<div style="text-align: center; margin-top: 24px">
-			<button class="btn coral" style="font-size: 20px" onclick={onstart} disabled={playerCount < 2}
+			<button class="btn coral" style="font-size: 20px" onclick={onstart} disabled={playerCount < 1}
 				>start game ▶</button
 			>
 		</div>
@@ -164,35 +157,6 @@
 		align-items: center;
 	}
 
-	.avatar {
-		width: 54px;
-		height: 54px;
-		border: 3px solid var(--ink);
-		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 24px;
-		box-shadow: 2px 2px 0 var(--ink);
-		flex-shrink: 0;
-		overflow: hidden;
-	}
-	.avatar.blob1 {
-		border-radius: 55% 45% 50% 50% / 50% 55% 45% 50%;
-	}
-	.avatar.blob2 {
-		border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%;
-	}
-	.avatar.blob3 {
-		border-radius: 50% 50% 45% 55% / 45% 50% 55% 50%;
-	}
-	.avatar-img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
-	}
-
 	.avatar-name {
 		font-size: 13px;
 		text-align: center;
@@ -211,16 +175,5 @@
 		border-radius: 20px;
 		box-shadow: 5px 5px 0 var(--ink);
 		transform: rotate(2deg);
-	}
-	.share-input {
-		font-family: 'Patrick Hand', cursive;
-		font-size: 13px;
-		text-align: center;
-		border: 2px solid var(--ink);
-		border-radius: 8px;
-		padding: 4px 8px;
-		background: #fffef9;
-		width: 100%;
-		max-width: 280px;
 	}
 </style>

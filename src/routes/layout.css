@@ -3,26 +3,15 @@
 
 :root {
 	--paper: #fff8ea;
-	--paper-dark: #fbefd4;
 	--ink: #3a332c;
 	--coral: #ff6b5b;
-	--coral-dark: #c8462f;
 	--yellow: #ffc83d;
-	--yellow-dark: #c98a0b;
 	--sky: #52bfee;
-	--sky-dark: #1c7fae;
 	--grass: #7bc95e;
-	--grass-dark: #3e8a22;
 	--grape: #b083e8;
-	--grape-dark: #6e3fb8;
 	--pink: #f490b8;
-	--pink-dark: #c24a7f;
-}
-* {
-	box-sizing: border-box;
-}
-body {
-	margin: 0;
+
+	color-scheme: light;
 	font-family: 'Patrick Hand', cursive;
 	background: var(--paper);
 	background-image: radial-gradient(circle at 1px 1px, rgba(58, 51, 44, 0.07) 1px, transparent 0);
@@ -30,432 +19,128 @@ body {
 	color: var(--ink);
 	padding: 24px 16px 60px;
 }
+
+.dark {
+	--paper: #fbefd4;
+	--coral: #c8462f;
+	--yellow: #c98a0b;
+	--sky: #1c7fae;
+	--grass: #3e8a22;
+	--grape: #6e3fb8;
+	--pink: #c24a7f;
+}
+
+@theme inline {
+	--color-paper: var(--paper);
+	--color-ink: var(--ink);
+	--color-coral: var(--coral);
+	--color-yellow: var(--yellow);
+	--color-sky: var(--sky);
+	--color-grass: var(--grass);
+	--color-grape: var(--grape);
+	--color-pink: var(--pink);
+
+	--font-title: 'Baloo 2', cursive;
+}
+
 h1,
 h2,
-h3,
-.title-font {
+h3 {
+	font-weight: bold;
 	font-family: 'Baloo 2', cursive;
 }
-.squiggle-underline {
-	display: inline-block;
-	position: relative;
-}
-.squiggle-underline svg {
-	display: block;
-	width: 100%;
-	height: 10px;
-	margin-top: -2px;
-}
 
-/* ---- top demo nav (not part of the product, just lets you flip screens) ---- */
-.demo-nav {
-	max-width: 1000px;
-	margin: 0 auto 28px;
-	display: flex;
-	flex-wrap: wrap;
-	gap: 10px;
-	justify-content: center;
-}
-.demo-nav button {
-	font-family: 'Baloo 2', cursive;
-	font-size: 14px;
-	font-weight: 700;
-	background: #fff;
-	color: var(--ink);
-	border: 3px solid var(--ink);
-	border-radius: 14px;
-	padding: 9px 16px;
-	cursor: pointer;
-	box-shadow: 3px 3px 0 var(--ink);
-	transition: transform 0.12s ease;
-}
-.demo-nav button:hover {
-	transform: translate(-1px, -1px);
-}
-.demo-nav button:active {
-	transform: translate(2px, 2px);
-	box-shadow: 1px 1px 0 var(--ink);
-}
-.demo-nav button.active {
-	background: var(--yellow);
-}
-
-.screen {
-	display: none;
-	max-width: 1000px;
-	margin: 0 auto;
-}
-.screen.active {
-	display: block;
-}
-
-/* ---- device frames ---- */
-.laptop-frame {
-	background: #fff;
-	border: 5px solid var(--ink);
-	border-radius: 18px;
-	padding: 18px 22px 22px;
-	box-shadow: 7px 7px 0 var(--ink);
-	background-image: linear-gradient(180deg, #fffef9, #fff);
-}
-.phone-frame {
-	width: 340px;
-	margin: 0 auto;
-	background: #fff;
-	border: 5px solid var(--ink);
-	border-radius: 34px;
-	padding: 14px 12px 18px;
-	box-shadow: 6px 6px 0 var(--ink);
-}
-.phone-notch {
-	width: 70px;
-	height: 8px;
-	background: var(--ink);
-	border-radius: 8px;
-	margin: 0 auto 10px;
-}
-
-/* ---- generic sticker card ---- */
-.sticker {
-	background: #fff;
-	border: 3.5px solid var(--ink);
-	border-radius: 16px 20px 18px 22px;
-	box-shadow: 4px 4px 0 var(--ink);
-	padding: 14px 16px;
-}
-.rot-1 {
-	transform: rotate(-1.4deg);
-}
-.rot-2 {
-	transform: rotate(1.1deg);
-}
-.rot-3 {
-	transform: rotate(-0.6deg);
-}
-
-/* ---- buttons ---- */
-.btn {
-	font-family: 'Baloo 2', cursive;
-	font-weight: 700;
-	font-size: 16px;
-	color: var(--ink);
-	border: 3px solid var(--ink);
-	border-radius: 16px;
-	padding: 11px 22px;
-	cursor: pointer;
-	box-shadow: 3px 3px 0 var(--ink);
-	transition:
-		transform 0.1s ease,
-		box-shadow 0.1s ease;
-	background: var(--yellow);
-}
-.btn:hover {
-	transform: translate(-1px, -2px) rotate(-1deg);
-}
-.btn:active {
-	transform: translate(2px, 2px) scale(0.97);
-	box-shadow: 1px 1px 0 var(--ink);
-}
-.btn.coral {
-	background: var(--coral);
-	color: #3a1208;
-}
-.btn.sky {
-	background: var(--sky);
-}
-.btn.grass {
-	background: var(--grass);
-}
-.btn.grape {
-	background: var(--grape);
-	color: #fff;
-}
-.btn.ghost {
-	background: #fff;
-}
-.btn:disabled {
-	opacity: 0.45;
-	cursor: not-allowed;
-}
-
-/* ---- avatars (blobby paper-cutout faces) ---- */
-.avatar {
-	width: 54px;
-	height: 54px;
-	border: 3px solid var(--ink);
-	position: relative;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 24px;
-	box-shadow: 2px 2px 0 var(--ink);
-	flex-shrink: 0;
-}
-.avatar.blob1 {
-	border-radius: 55% 45% 50% 50% / 50% 55% 45% 50%;
-}
-.avatar.blob2 {
-	border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%;
-}
-.avatar.blob3 {
-	border-radius: 50% 50% 45% 55% / 45% 50% 55% 50%;
-}
-.avatar-mini {
-	width: 38px;
-	height: 38px;
-	font-size: 18px;
-}
-.avatar-name {
-	font-size: 13px;
-	text-align: center;
-	margin-top: 4px;
-	font-weight: 700;
-	color: var(--ink);
-	max-width: 64px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-/* ---- confetti doodles ---- */
-.confetti-wrap {
-	position: relative;
-}
-.confetti {
-	position: absolute;
-	font-size: 20px;
-	opacity: 0.8;
-	animation: float 3.5s ease-in-out infinite;
-}
-@keyframes float {
-	0%,
-	100% {
-		transform: translateY(0) rotate(0deg);
+@layer components {
+	.frame {
+		background: #fff;
+		border: 5px solid var(--ink);
+		border-radius: 18px;
+		padding: 18px 22px 22px;
+		box-shadow: 7px 7px 0 var(--ink);
+		background-image: linear-gradient(180deg, #fffef9, #fff);
 	}
-	50% {
-		transform: translateY(-10px) rotate(12deg);
+
+	.ink {
+		border: 4px solid var(--ink);
+		border-radius: 20px;
+		box-shadow: 5px 5px 0 var(--ink);
+	}
+
+	.ink-sm {
+		border: 3px solid var(--ink);
+		border-radius: 15px;
+		box-shadow: 2px 2px 0 var(--ink);
+	}
+
+	.btn {
+		font-family: 'Baloo 2', cursive;
+		font-weight: 700;
+		font-size: 16px;
+		color: var(--ink);
+		border: 3px solid var(--ink);
+		border-radius: 16px;
+		padding: 11px 22px;
+		cursor: pointer;
+		box-shadow: 3px 3px 0 var(--ink);
+		transition:
+			transform 0.1s ease,
+			box-shadow 0.1s ease;
+		background: var(--yellow);
+	}
+	.btn:hover {
+		transform: translate(-1px, -2px) rotate(-1deg);
+	}
+	.btn:active {
+		transform: translate(2px, 2px) scale(0.97);
+		box-shadow: 1px 1px 0 var(--ink);
+	}
+	.btn.coral {
+		background: var(--coral);
+		color: #3a1208;
+	}
+	.btn.sky {
+		background: var(--sky);
+	}
+	.btn.grass {
+		background: var(--grass);
+	}
+	.btn.grape {
+		background: var(--grape);
+		color: #fff;
+	}
+	.btn.ghost {
+		background: #fff;
+	}
+	.btn:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
 	}
 }
 
-/* ===================== PRESENTER LOBBY ===================== */
-.room-code-sticker {
-	background: var(--coral);
-	border: 4px solid var(--ink);
-	border-radius: 20px;
-	padding: 18px 30px;
-	display: inline-block;
-	box-shadow: 5px 5px 0 var(--ink);
-	transform: rotate(-2deg);
-}
-.room-code-sticker .code {
-	font-family: 'Baloo 2', cursive;
-	font-size: 46px;
-	font-weight: 800;
-	color: #3a1208;
-	letter-spacing: 6px;
-}
-.player-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
-	gap: 14px;
-	margin-top: 18px;
-}
-.player-tile {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-/* ===================== PRESENTER GAME VIEW ===================== */
-.scene {
-	height: 300px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: repeating-linear-gradient(
-		135deg,
-		rgba(82, 191, 238, 0.1) 0 14px,
-		transparent 14px 28px
-	);
-	border: 3px dashed var(--ink);
-	border-radius: 18px;
-	position: relative;
-	overflow: hidden;
-}
-.cube-wrap {
-	perspective: 700px;
-}
-.cube {
-	width: 120px;
-	height: 120px;
-	position: relative;
-	transform-style: preserve-3d;
-	animation: spin 7s linear infinite;
-}
-@keyframes spin {
-	from {
-		transform: rotateX(0deg) rotateY(0deg);
+@layer utilities {
+	.squiggle-underline {
+		display: inline-block;
+		position: relative;
 	}
-	to {
-		transform: rotateX(360deg) rotateY(360deg);
+	.squiggle-underline svg {
+		display: block;
+		width: 100%;
+		height: 10px;
+		margin-top: -2px;
+	}
+
+	.blob1 {
+		border-radius: 55% 45% 50% 50% / 50% 55% 45% 50%;
+	}
+	.blob2 {
+		border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%;
+	}
+	.blob3 {
+		border-radius: 50% 50% 45% 55% / 45% 50% 55% 50%;
 	}
 }
-.face {
-	position: absolute;
-	width: 120px;
-	height: 120px;
-	border: 4px solid var(--ink);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 38px;
-	font-family: 'Baloo 2', cursive;
-	font-weight: 800;
-}
-.f1 {
-	background: var(--coral);
-	transform: translateZ(60px);
-}
-.f2 {
-	background: var(--sky);
-	transform: rotateY(180deg) translateZ(60px);
-}
-.f3 {
-	background: var(--yellow);
-	transform: rotateY(90deg) translateZ(60px);
-}
-.f4 {
-	background: var(--grass);
-	transform: rotateY(-90deg) translateZ(60px);
-}
-.f5 {
-	background: var(--grape);
-	transform: rotateX(90deg) translateZ(60px);
-	color: #fff;
-}
-.f6 {
-	background: var(--pink);
-	transform: rotateX(-90deg) translateZ(60px);
-}
 
-.timer-pill {
-	position: absolute;
-	top: 14px;
-	right: 14px;
-	background: #fff;
-	border: 3px solid var(--ink);
-	border-radius: 30px;
-	padding: 6px 18px;
-	font-family: 'Baloo 2', cursive;
-	font-weight: 800;
-	font-size: 20px;
-	box-shadow: 3px 3px 0 var(--ink);
-	transform: rotate(3deg);
-}
-.question-banner {
-	text-align: center;
-	font-family: 'Baloo 2', cursive;
-	font-size: 22px;
-	font-weight: 700;
-	margin: 14px 0 6px;
-}
-.player-row {
-	display: flex;
-	gap: 10px;
-	margin-top: 18px;
-	overflow-x: auto;
-	padding: 6px 4px 10px;
-}
-.player-row .player-tile {
-	flex-shrink: 0;
-}
-.score-badge {
-	background: var(--grass);
-	border: 2px solid var(--ink);
-	border-radius: 10px;
-	font-size: 11px;
-	font-weight: 700;
-	padding: 1px 6px;
-	margin-top: 2px;
-}
-
-/* ===================== PHONE LOBBY ===================== */
-.phone-screen-pad {
-	padding: 6px 6px 2px;
-}
-.waiting-text {
-	text-align: center;
-	font-family: 'Baloo 2', cursive;
-	font-size: 18px;
-	margin: 10px 0;
-}
-.mini-confetti-bar {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	justify-content: center;
-	margin-top: 14px;
-}
-
-/* ===================== CHARACTER CREATOR ===================== */
-.creator-preview {
-	display: flex;
-	justify-content: center;
-	margin: 6px 0 14px;
-}
-.big-avatar {
-	width: 130px;
-	height: 130px;
-	font-size: 60px;
-	border-width: 4px;
-}
-.swatch-row {
-	display: flex;
-	gap: 8px;
-	justify-content: center;
-	margin-bottom: 12px;
-	flex-wrap: wrap;
-}
-.swatch {
-	width: 34px;
-	height: 34px;
-	border-radius: 50%;
-	border: 3px solid var(--ink);
-	cursor: pointer;
-}
-.swatch.selected {
-	box-shadow:
-		0 0 0 3px #fff,
-		0 0 0 6px var(--ink);
-}
-.accessory-row {
-	display: flex;
-	gap: 8px;
-	justify-content: center;
-	flex-wrap: wrap;
-	margin-bottom: 8px;
-}
-.accessory-btn {
-	width: 46px;
-	height: 46px;
-	border: 3px solid var(--ink);
-	border-radius: 12px;
-	background: #fff;
-	font-size: 22px;
-	cursor: pointer;
-	box-shadow: 2px 2px 0 var(--ink);
-}
-.accessory-btn.selected {
-	background: var(--yellow);
-}
-.label-tag {
-	font-family: 'Baloo 2', cursive;
-	font-weight: 700;
-	font-size: 13px;
-	text-align: center;
-	margin: 10px 0 6px;
-}
-.name-input {
+input[type='text'] {
 	width: 100%;
 	font-family: 'Patrick Hand', cursive;
 	font-size: 18px;
@@ -466,80 +151,10 @@ h3,
 	background: #fffef9;
 }
 
-/* ===================== PHONE DRAW + SUBMIT ===================== */
-.canvas-wrap {
-	border: 4px solid var(--ink);
-	border-radius: 14px;
-	overflow: hidden;
-	background: #fff;
-	box-shadow: 3px 3px 0 var(--ink);
-}
-#drawCanvas {
-	display: block;
-	width: 100%;
-	height: 260px;
-	touch-action: none;
-	background: #fffef9;
-}
-.tool-row {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin: 10px 0;
-	justify-content: center;
-	flex-wrap: wrap;
-}
-.tool-btn {
-	width: 40px;
-	height: 40px;
-	border: 3px solid var(--ink);
-	border-radius: 10px;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: #fff;
-}
-.tool-btn.selected {
-	background: var(--yellow);
-}
-.color-dot {
-	width: 26px;
-	height: 26px;
-	border-radius: 50%;
-	border: 3px solid var(--ink);
-	cursor: pointer;
-}
-.color-dot.selected {
-	box-shadow:
-		0 0 0 2px #fff,
-		0 0 0 5px var(--ink);
-}
-.prompt-banner {
-	background: var(--sky);
-	border: 3px solid var(--ink);
-	border-radius: 14px;
-	padding: 10px 14px;
-	text-align: center;
+label {
 	font-family: 'Baloo 2', cursive;
 	font-weight: 700;
-	font-size: 16px;
-	margin-bottom: 10px;
-	box-shadow: 3px 3px 0 var(--ink);
-	transform: rotate(-1deg);
-}
-.top-avatar-strip {
-	display: flex;
-	gap: 6px;
-	justify-content: center;
-	margin-bottom: 8px;
-}
-
-.section-label {
-	font-family: 'Baloo 2', cursive;
 	font-size: 13px;
-	color: var(--ink);
-	opacity: 0.6;
 	text-align: center;
-	margin-bottom: 10px;
+	margin: 10px 0 6px;
 }

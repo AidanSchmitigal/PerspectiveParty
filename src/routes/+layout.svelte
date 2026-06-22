@@ -6,6 +6,7 @@
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
-<main class="app-shell">
+
+<main>
 	{@render children()}
 </main>

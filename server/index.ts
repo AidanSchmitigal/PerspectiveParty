@@ -1,9 +1,8 @@
-import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
 import { parse } from 'url';
+import { WebSocket, WebSocketServer } from 'ws';
 import {
 	challenges,
-	makeAvatar,
 	sanitizeName,
 	type Avatar,
 	type ClientMessage,
@@ -13,7 +12,6 @@ import {
 } from '../src/lib/game';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
-const defaultNames = ['Squiggle', 'Doodle', 'Wobble', 'Noodle', 'Zigzag', 'Pebble'];
 
 class GameRoom {
 	state: GameState;
@@ -28,7 +26,8 @@ class GameRoom {
 			presenterId: null,
 			challenge: challenges[0],
 			players: [],
-			updatedAt: Date.now()
+			updatedAt: Date.now(),
+			phaseStartedAt: Date.now()
 		};
 	}
 
@@ -83,11 +82,13 @@ class GameRoom {
 				break;
 			case 'phase':
 				this.state.phase = parsed.phase;
+				this.state.phaseStartedAt = Date.now();
 				if (parsed.phase === 'study' || parsed.phase === 'draw') this.clearDoneFlags();
 				break;
 			case 'next-round':
 				this.state.round += 1;
 				this.state.phase = 'study';
+				this.state.phaseStartedAt = Date.now();
 				this.state.challenge = challenges[this.state.round % challenges.length];
 				this.state.players = this.state.players.map((player) => ({
 					...player,
@@ -124,7 +125,7 @@ class GameRoom {
 		return this.connections.size === 0;
 	}
 
-	private makeInitialState() {
+	private makeInitialState(): GameState {
 		return {
 			roomCode: this.state.roomCode,
 			phase: 'lobby',
@@ -132,7 +133,8 @@ class GameRoom {
 			presenterId: null,
 			challenge: challenges[0],
 			players: [],
-			updatedAt: Date.now()
+			updatedAt: Date.now(),
+			phaseStartedAt: Date.now()
 		};
 	}
 
@@ -192,7 +194,7 @@ wss.on('connection', (ws, req) => {
 	const url = parse(req.url || '', true);
 	const roomCode = ((url.query.room as string) || '')
 		.toUpperCase()
-		.replace(/[^A-Z0-9]/g, '')
+		.replace(/[^A-Z]/g, '')
 		.slice(0, 8);
 	if (!roomCode) {
 		ws.close(4000, 'Room code required');
