@@ -1,42 +1,24 @@
-# sv
+# Perspective Party
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A Jackbox-like spatial reasoning drawing game.
 
-## Creating a project
+There are rooms. You play with friends and need to study then recall 3d shapes and draw them.
 
-If you're seeing this, you've probably already done this step. Congrats!
+# Development
 
-```sh
-# create a new project
-npx sv create my-app
-```
+There is no security stuff so people can easily cheat in rooms.
 
-To recreate this project with the same configuration:
+There is a WebSocket server that runs on the server. It's a simple Node.js server that just broadcasts messages to all connected clients.
 
-```sh
-# recreate this project
-pnpm dlx sv@0.16.1 create --template minimal --types ts --add prettier eslint tailwindcss="plugins:none" --install pnpm PerspectiveParty
-```
+Claude made the design for the Frontend (most of it).
 
-## Developing
+# Assets
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+The 3d models are in the `static/models` folder.
+They are taken from [Design Asset : 3D Holographic pack Free](https://archivalphilia.gumroad.com/l/cuejp?layout=profile&recommended_by=library) and [Motion Primitives Addon](https://tufjo.gumroad.com/l/MotionPrimativesAddon).
 
-```sh
-npm run dev
+Favicon is from [Cool Shapes](https://coolshap.es/)
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+All licenses and credits for the models belong to their respective owners.
 
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+The code is free to use.
