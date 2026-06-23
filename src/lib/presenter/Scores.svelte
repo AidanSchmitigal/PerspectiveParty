@@ -47,5 +47,9 @@
 		{/each}
 	</div>
 
-	<button class="btn coral text-lg absolute -top-4 -right-4" onclick={nextRound} use:clickFeedback>next round</button>
+	<button
+		class="btn coral text-lg absolute -top-4 -right-4 whitespace-nowrap"
+		onclick={nextRound}
+		use:clickFeedback>next round</button
+	>
 </div>

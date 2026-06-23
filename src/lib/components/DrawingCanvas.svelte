@@ -83,6 +83,7 @@
 		avatarCanvas.setPointerCapture(event.pointerId);
 		drawing = true;
 		lastPoint = pointFromEvent(event);
+		drawStroke(event);
 	}
 
 	function drawStroke(event: PointerEvent) {
@@ -90,12 +91,19 @@
 		const point = pointFromEvent(event);
 		const context = avatarCanvas.getContext('2d');
 		if (!context) return;
-		context.strokeStyle = brushColor;
-		context.lineWidth = brushSize;
-		context.beginPath();
-		context.moveTo(lastPoint.x, lastPoint.y);
-		context.lineTo(point.x, point.y);
-		context.stroke();
+		if (lastPoint.x === point.x && lastPoint.y === point.y) {
+			context.fillStyle = brushColor;
+			context.beginPath();
+			context.arc(point.x, point.y, brushSize / 2, 0, Math.PI * 2);
+			context.fill();
+		} else {
+			context.strokeStyle = brushColor;
+			context.lineWidth = brushSize;
+			context.beginPath();
+			context.moveTo(lastPoint.x, lastPoint.y);
+			context.lineTo(point.x, point.y);
+			context.stroke();
+		}
 		lastPoint = point;
 		throttledStrokeTick();
 		queueCanvasSend();
