@@ -184,7 +184,7 @@
 			{/each}
 		</div>
 
-		<button class="btn coral text-lg absolute -top-4 -right-4" onclick={nextRound}
+		<button class="btn coral text-lg absolute z-10 -top-4 -right-4" onclick={nextRound}
 			>next round</button
 		>
 	{/if}

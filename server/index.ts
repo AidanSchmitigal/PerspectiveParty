@@ -268,7 +268,9 @@ class GameRoom {
 
 const rooms = new Map<string, GameRoom>();
 
-let svelteKitHandler: ((req: import('http').IncomingMessage, res: import('http').ServerResponse) => void) | null = null;
+let svelteKitHandler:
+	| ((req: import('http').IncomingMessage, res: import('http').ServerResponse, next?: void) => void)
+	| null = null;
 
 const server = createServer(async (req, res) => {
 	if (svelteKitHandler) {
