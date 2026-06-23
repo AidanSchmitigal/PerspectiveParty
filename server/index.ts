@@ -13,7 +13,7 @@ import {
 	type ServerMessage
 } from '../src/lib/game';
 
-const PORT = parseInt(process.env.PORT || '3001', 10);
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
 class GameRoom {
 	state: GameState;
@@ -268,9 +268,15 @@ class GameRoom {
 
 const rooms = new Map<string, GameRoom>();
 
-const server = createServer((_req, res) => {
-	res.writeHead(200, { 'Content-Type': 'text/plain' });
-	res.end('Perspective Party WS Server\n');
+let svelteKitHandler: ((req: import('http').IncomingMessage, res: import('http').ServerResponse) => void) | null = null;
+
+const server = createServer(async (req, res) => {
+	if (svelteKitHandler) {
+		svelteKitHandler(req, res);
+	} else {
+		res.writeHead(200, { 'Content-Type': 'text/plain' });
+		res.end('Perspective Party WS Server\n');
+	}
 });
 
 const wss = new WebSocketServer({ server });
@@ -307,6 +313,18 @@ wss.on('connection', (ws, req) => {
 	});
 });
 
-server.listen(PORT, () => {
-	console.log(`WS server listening on port ${PORT}`);
-});
+async function start() {
+	try {
+		const mod = await import('../build/handler.js');
+		svelteKitHandler = mod.handler;
+		console.log('SvelteKit handler loaded');
+	} catch {
+		console.log('No SvelteKit build found — WS server only');
+	}
+
+	server.listen(PORT, () => {
+		console.log(`Server listening on port ${PORT}`);
+	});
+}
+
+start();
