@@ -9,6 +9,7 @@ node_modules
 .partykit
 /.svelte-kit
 /build
+/build-server
 
 # OS
 .DS_Store
