@@ -4,11 +4,14 @@ import { WebSocket, WebSocketServer } from 'ws';
 import {
 	challenges,
 	sanitizeName,
+	VOTING_DURATION,
+	POINTS_PER_RANK,
 	type Avatar,
 	type ClientMessage,
 	type GameState,
 	type Player,
-	type ServerMessage
+	type ServerMessage,
+	type Vote
 } from '../src/lib/game';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -25,6 +28,7 @@ class GameRoom {
 			presenterId: null,
 			challenge: challenges[0],
 			players: [],
+			votes: [],
 			updatedAt: Date.now(),
 			phaseStartedAt: Date.now()
 		};
@@ -76,12 +80,15 @@ class GameRoom {
 				this.state.phase = parsed.phase;
 				this.state.phaseStartedAt = Date.now();
 				if (parsed.phase === 'study' || parsed.phase === 'draw') this.clearDoneFlags();
+				if (parsed.phase === 'reveal') this.state.votes = [];
+				if (parsed.phase === 'scores') this.advanceToScores();
 				break;
 			case 'next-round':
 				this.state.round += 1;
 				this.state.phase = 'study';
 				this.state.phaseStartedAt = Date.now();
 				this.state.challenge = challenges[this.state.round % challenges.length];
+				this.state.votes = [];
 				this.state.players = this.state.players.map((player) => ({
 					...player,
 					drawing: undefined,
@@ -96,6 +103,9 @@ class GameRoom {
 				break;
 			case 'done':
 				this.patchPlayer(senderId, { done: parsed.done });
+				break;
+			case 'submit-vote':
+				this.handleVote(senderId, parsed.rankings);
 				break;
 			case 'score':
 				this.state.players = this.state.players.map((player) =>
@@ -125,6 +135,7 @@ class GameRoom {
 			presenterId: null,
 			challenge: challenges[0],
 			players: [],
+			votes: [],
 			updatedAt: Date.now(),
 			phaseStartedAt: Date.now()
 		};
@@ -156,6 +167,49 @@ class GameRoom {
 
 	private clearDoneFlags() {
 		this.state.players = this.state.players.map((player) => ({ ...player, done: false }));
+	}
+
+	private handleVote(voterId: string, rankings: string[]) {
+		const playerIds = this.state.players.map((p) => p.id);
+		const maxRank = Math.min(3, playerIds.length - 1);
+
+		if (rankings.length !== maxRank) return;
+		if (new Set(rankings).size !== maxRank) return;
+		if (rankings.includes(voterId)) return;
+		if (!rankings.every((id) => playerIds.includes(id))) return;
+		if (this.state.votes.some((v) => v.voterId === voterId)) return;
+
+		this.state.votes = this.state.votes.filter((v) => v.voterId !== voterId);
+		this.state.votes.push({ voterId, rankings });
+
+		if (this.checkVotingComplete()) {
+			this.advanceToScores();
+		}
+	}
+
+	private checkVotingComplete(): boolean {
+		const voterIds = this.state.players.map((p) => p.id);
+		const votedIds = this.state.votes.map((v) => v.voterId);
+		return voterIds.every((id) => votedIds.includes(id));
+	}
+
+	private advanceToScores() {
+		const points: Record<string, number> = {};
+		for (const player of this.state.players) {
+			points[player.id] = 0;
+		}
+
+		for (const vote of this.state.votes) {
+			for (let i = 0; i < vote.rankings.length; i++) {
+				const pts = POINTS_PER_RANK[i] ?? 0;
+				points[vote.rankings[i]] = (points[vote.rankings[i]] ?? 0) + pts;
+			}
+		}
+
+		this.state.players = this.state.players.map((player) => ({
+			...player,
+			score: player.score + (points[player.id] ?? 0)
+		}));
 	}
 
 	private touch() {

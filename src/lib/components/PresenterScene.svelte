@@ -88,8 +88,7 @@
 	};
 
 	let hideModel = $derived(roomState.gameState.phase === 'draw');
-	// let targetAngle = $derived(roomState.gameState.challenge.targetAngle);
-	let targetAngle = 'Blue';
+	let targetAngle = $derived(roomState.gameState.challenge.targetAngle);
 	let arrow = $derived(arrowConfig[targetAngle]);
 	let model = $derived(roomState.gameState.challenge.model);
 
@@ -179,7 +178,6 @@
 </script>
 
 <div class="size-full">
-	{model}
 	<Canvas toneMapping={THREE.ACESFilmicToneMapping} shadows dpr={[1, 2]}>
 		{#if ortho}
 			<T.OrthographicCamera

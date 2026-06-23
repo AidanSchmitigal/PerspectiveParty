@@ -34,8 +34,23 @@ export default defineConfig(
 		}
 	},
 	{
-		// Override or add rule settings here, such as:
-		// 'svelte/button-has-type': 'error'
-		rules: {}
+		// Allow unused variables with underscore prefix, which we use for private class members
+		rules: {
+			'react-refresh/only-export-components': [
+				'error',
+				{
+					allowConstantExport: true
+				}
+			],
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{
+					argsIgnorePattern: '^_',
+					varsIgnorePattern: '^_',
+					caughtErrorsIgnorePattern: '^_',
+					ignoreRestSiblings: true
+				}
+			]
+		}
 	}
 );
