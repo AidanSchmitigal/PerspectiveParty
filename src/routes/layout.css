@@ -159,6 +159,7 @@ label {
 	margin: 10px 0 6px;
 }
 
+img,
 canvas {
 	image-rendering: pixelated;
 	image-rendering: crisp-edges;

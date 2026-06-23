@@ -1,6 +1,6 @@
 export type Phase = 'lobby' | 'study' | 'draw' | 'reveal';
 
-const angles = ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'];
+const angles = ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] as const;
 export type Angles = (typeof angles)[number];
 
 export type Avatar = {

@@ -7,6 +7,8 @@
 	import { Spring } from 'svelte/motion';
 	import * as THREE from 'three';
 
+	let { ortho }: { ortho?: boolean } = $props();
+
 	const cardinalColors = [
 		new THREE.Color(0xff4444), // +X: Red
 		new THREE.Color(0x44ffff), // -X: Cyan
@@ -74,12 +76,91 @@
 		});
 	}
 
-	let hideModel = $derived(roomState.gameState.phase === 'draw');
+	const arrowConfig: Record<
+		string,
+		{ pos: [number, number, number]; rot: [number, number, number]; color: string }
+	> = {
+		Red: { pos: [3, 0, 0], rot: [0, 0, Math.PI / 2], color: '#ff4444' },
+		Cyan: { pos: [-3, 0, 0], rot: [0, 0, -Math.PI / 2], color: '#44ffff' },
+		Green: { pos: [0, 2.8, 0], rot: [Math.PI, 0, 0], color: '#44ff44' },
+		Magenta: { pos: [0, -2.8, 0], rot: [0, 0, 0], color: '#ff44ff' },
+		Blue: { pos: [0, 0, 3], rot: [-Math.PI / 2, 0, 0], color: '#4444ff' },
+		Yellow: { pos: [0, 0, -3], rot: [Math.PI / 2, 0, 0], color: '#ffff44' }
+	};
 
+	let hideModel = $derived(roomState.gameState.phase === 'draw');
+	// let targetAngle = $derived(roomState.gameState.challenge.targetAngle);
+	let targetAngle = 'Blue';
+	let arrow = $derived(arrowConfig[targetAngle]);
 	let model = $derived(roomState.gameState.challenge.model);
-	let angle = new Spring(0.6, { stiffness: 0.001, damping: 0 });
-	angle.target = 0;
-	let spin = new Counter(0, { autoStart: true, rate: 1 });
+
+	let angle = new Spring(0.6, { stiffness: 0.001, damping: 0, precision: 0.001 });
+	let spin: Counter | Spring<number> = new Counter(0, { autoStart: true, rate: 1 });
+
+	$effect(() => {
+		if (ortho) {
+			if (targetAngle === 'Green') {
+				angle.set(Math.PI / 2, { instant: true });
+				angle.target = Math.PI / 2;
+			} else if (targetAngle === 'Magenta') {
+				angle.set(-Math.PI / 2, { instant: true });
+				angle.target = -Math.PI / 2;
+			} else {
+				angle.set(0, { instant: true });
+				angle.target = 0;
+			}
+
+			let angleRot = 0;
+			switch (targetAngle) {
+				case 'Red':
+					angleRot = 0;
+					break;
+				case 'Cyan':
+					angleRot = Math.PI;
+					break;
+				case 'Blue':
+					angleRot = Math.PI / 2;
+					break;
+				case 'Yellow':
+					angleRot = -Math.PI / 2;
+					break;
+			}
+			spin = new Counter(angleRot, { autoStart: false, rate: 0 });
+		} else if (hideModel) {
+			if (targetAngle === 'Green') {
+				angle.set(0.7, { instant: true });
+				angle.target = 0.5;
+			} else if (targetAngle === 'Magenta') {
+				angle.set(-0.7, { instant: true });
+				angle.target = -0.5;
+			} else {
+				angle.set(0.6, { instant: true });
+				angle.target = 0;
+
+				let angleRot = 0;
+				switch (targetAngle) {
+					case 'Red':
+						angleRot = 0;
+						break;
+					case 'Cyan':
+						angleRot = Math.PI;
+						break;
+					case 'Blue':
+						angleRot = Math.PI / 2;
+						break;
+					case 'Yellow':
+						angleRot = -Math.PI / 2;
+						break;
+				}
+				spin = new Spring(angleRot + 1, { stiffness: 0.0005, damping: 0 });
+				spin.target = angleRot;
+			}
+		} else {
+			angle.set(0.6);
+			angle.target = 0;
+			spin = new Counter(0, { autoStart: true, rate: 1 });
+		}
+	});
 
 	let h = $derived(Math.sin(angle.current) * 5);
 	let w = $derived(Math.cos(angle.current) * 5);
@@ -100,17 +181,28 @@
 
 <div class="size-full">
 	<Canvas toneMapping={THREE.ACESFilmicToneMapping} shadows dpr={[1, 2]}>
-		<T.PerspectiveCamera
-			makeDefault
-			fov={35}
-			near={0.1}
-			far={100}
-			position={[x, h, z]}
-			oncreate={(c) => c.lookAt(0, 0, 0)}
-		/>
+		{#if ortho}
+			<T.OrthographicCamera
+				makeDefault
+				zoom={62}
+				near={0.1}
+				far={100}
+				position={[x, h, z]}
+				oncreate={(c) => c.lookAt(0, 0, 0)}
+			/>
+		{:else}
+			<T.PerspectiveCamera
+				makeDefault
+				fov={35}
+				near={0.1}
+				far={100}
+				position={[x, h, z]}
+				oncreate={(c) => c.lookAt(0, 0, 0)}
+			/>
+		{/if}
 		<OrbitControls
 			autoRotate
-			autoRotateSpeed={4}
+			autoRotateSpeed={0}
 			enableDamping={false}
 			enablePan={false}
 			enableZoom={false}
@@ -148,6 +240,18 @@
 				<T.BoxGeometry />
 				<T.MeshStandardMaterial oncreate={(mat) => setupCardinalMaterial(mat)} />
 			</T.Mesh>
+			<T.Group position={arrow.pos}>
+				<T.Group rotation={arrow.rot}>
+					<T.Mesh position={[0, 0.8, 0]}>
+						<T.CylinderGeometry args={[0.06, 0.06, 1.6]} />
+						<T.MeshStandardMaterial color={arrow.color} />
+					</T.Mesh>
+					<T.Mesh position={[0, 1.7, 0]}>
+						<T.ConeGeometry args={[0.22, 0.3]} />
+						<T.MeshStandardMaterial color={arrow.color} />
+					</T.Mesh>
+				</T.Group>
+			</T.Group>
 		{/if}
 	</Canvas>
 </div>
