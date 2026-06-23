@@ -1,6 +1,7 @@
 <script lang="ts">
 	import DrawingCanvas from '$lib/components/DrawingCanvas.svelte';
 	import { roomState } from '$lib/room.svelte';
+	import { clickFeedback } from '$lib/feedback.svelte';
 
 	let drawingDataUrl = $state('');
 
@@ -52,7 +53,7 @@
 			}}
 		/>
 
-		<button class="btn coral w-full text-lg" onclick={submitDrawing} disabled={done}>
+		<button class="btn coral w-full text-lg" onclick={submitDrawing} disabled={done} use:clickFeedback>
 			{done ? 'submitted! ✓' : 'submit drawing 🎨'}
 		</button>
 	</div>

@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { play, clickFeedback } from '$lib/feedback.svelte';
+	import { throttle } from '$lib/index';
+
 	let {
 		initialDrawing = '',
 		avatar = false,
@@ -17,6 +20,11 @@
 	const thinSize = 6;
 	const thickSize = 12;
 	const CANVAS_WIDTH = 100;
+
+	const throttledStrokeTick = throttle(() => {
+		navigator.vibrate?.(6);
+		play('tick');
+	}, 120);
 
 	let avatarCanvas = $state<HTMLCanvasElement>();
 	let brushColor = $state(palette[0]);
@@ -69,6 +77,8 @@
 
 	function startStroke(event: PointerEvent) {
 		if (!avatarCanvas || disabled) return;
+		navigator.vibrate?.(6);
+		play('tick');
 		undoStack.push(avatarCanvas.toDataURL('image/png'));
 		avatarCanvas.setPointerCapture(event.pointerId);
 		drawing = true;
@@ -87,11 +97,14 @@
 		context.lineTo(point.x, point.y);
 		context.stroke();
 		lastPoint = point;
+		throttledStrokeTick();
 		queueCanvasSend();
 	}
 
 	function endStroke(event: PointerEvent) {
 		if (!avatarCanvas || !drawing) return;
+		navigator.vibrate?.(6);
+		play('tick');
 		drawing = false;
 		lastPoint = null;
 		avatarCanvas.releasePointerCapture(event.pointerId);
@@ -148,7 +161,7 @@
 	}
 </script>
 
-<div class="flex justify-center mt-2 mb-4 {disabled ? 'opacity-40' : ''}">
+<div class="flex justify-center mt-2 mb-4 select-none {disabled ? 'opacity-40' : ''}">
 	<div
 		class="ink flex relative items-center justify-center shrink-0 w-full aspect-square bg-coral overflow-clip {avatar &&
 			'blob1'} {disabled ? 'pointer-events-none' : ''}"
@@ -166,7 +179,11 @@
 		</div>
 	</div>
 </div>
-<div class="flex items-center gap-2 mt-4 justify-center flex-wrap {disabled ? 'opacity-40 pointer-events-none' : ''}">
+<div
+	class="flex items-center gap-2 mt-4 justify-center select-none flex-wrap {disabled
+		? 'opacity-40 pointer-events-none'
+		: ''}"
+>
 	{#each palette as color (color)}
 		<button
 			class="size-7 rounded-full border-3 border-ink cursor-pointer {brushColor === color &&
@@ -174,21 +191,28 @@
 			style={`background: ${color}`}
 			aria-label="Brush {color}"
 			onclick={() => (brushColor = color)}
+			use:clickFeedback
 		></button>
 	{/each}
 </div>
-<div class="flex items-center gap-2 my-2.5 justify-center flex-wrap {disabled ? 'opacity-40 pointer-events-none' : ''}">
+<div
+	class="flex items-center gap-2 my-2.5 justify-center select-none flex-wrap {disabled
+		? 'opacity-40 pointer-events-none'
+		: ''}"
+>
 	<button
 		class="size-10 border-3 border-ink cursor-pointer rounded-xl flex items-center justify-center text-3xl bg-white"
 		class:bg-yellow={brushSize === thinSize}
 		onclick={() => (brushSize = thinSize)}
-		title="thin brush">·</button
+		title="thin brush"
+		use:clickFeedback>·</button
 	>
 	<button
 		class="size-10 border-3 border-ink cursor-pointer rounded-xl flex items-center justify-center text-3xl bg-white"
 		class:bg-yellow={brushSize === thickSize}
 		onclick={() => (brushSize = thickSize)}
 		title="thick brush"
+		use:clickFeedback
 	>
 		●
 	</button>
@@ -196,12 +220,14 @@
 		class="size-10 border-3 border-ink cursor-pointer rounded-xl flex items-center justify-center text-3xl bg-white disabled:opacity-50"
 		onclick={undo}
 		disabled={undoStack.length === 0 || disabled}
-		title="undo">↺</button
+		title="undo"
+		use:clickFeedback>↺</button
 	>
 	<button
 		class="size-10 border-3 border-ink cursor-pointer rounded-xl flex items-center justify-center text-2xl bg-white"
 		onclick={clearCanvas}
-		disabled={disabled}
-		title="clear">⌫</button
+		{disabled}
+		title="clear"
+		use:clickFeedback>⌫</button
 	>
 </div>

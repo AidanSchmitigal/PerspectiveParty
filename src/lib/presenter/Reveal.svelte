@@ -3,6 +3,7 @@
 	import { getTimeRemaining, POINTS_PER_RANK, ROUND_COUNT } from '$lib/game';
 	import { roomState } from '$lib/room.svelte';
 	import { onMount } from 'svelte';
+	import { clickFeedback } from '$lib/feedback.svelte';
 
 	let now = $state(Date.now());
 
@@ -154,7 +155,7 @@
 		</div>
 
 		<div class="mt-4 flex justify-center">
-			<button class="btn coral text-lg" onclick={advance}>
+			<button class="btn coral text-lg" onclick={advance} use:clickFeedback>
 				{allVoted ? 'View Scores' : 'Waiting for votes…'}
 			</button>
 		</div>
@@ -184,7 +185,7 @@
 			{/each}
 		</div>
 
-		<button class="btn coral text-lg absolute z-10 -top-4 -right-4" onclick={nextRound}
+		<button class="btn coral text-lg absolute z-10 -top-4 -right-4" onclick={nextRound} use:clickFeedback
 			>next round</button
 		>
 	{/if}

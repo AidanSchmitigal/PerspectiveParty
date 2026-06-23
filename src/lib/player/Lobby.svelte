@@ -3,6 +3,7 @@
 	import { makeAvatar, sanitizeName, type Avatar } from '$lib/game';
 	import { roomState } from '$lib/room.svelte';
 	import { onMount } from 'svelte';
+	import { clickFeedback } from '$lib/feedback.svelte';
 
 	let {
 		autoJoin = false,
@@ -68,7 +69,7 @@
 		<input type="text" id="ccName" placeholder="Lentil" maxlength="14" bind:value={name} />
 
 		{#if !autoJoin}
-			<button class="btn grass w-full text-lg mt-4" onclick={() => onjoin(name, avatar)}
+			<button class="btn grass w-full text-lg mt-4" onclick={() => onjoin(name, avatar)} use:clickFeedback
 				>Join Game</button
 			>
 		{/if}

@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import Confetti from '$lib/components/Confetti.svelte';
 	import { roomState } from '$lib/room.svelte';
+	import { clickFeedback } from '$lib/feedback.svelte';
 
 	let sortedPlayers = $derived.by(() => {
 		return [...roomState.gameState.players].sort((a, b) => b.score - a.score);
@@ -38,6 +39,6 @@
 	{/if}
 
 	<div class="flex justify-center mt-4">
-		<button class="btn coral text-xl" onclick={playAgain}>Play Again</button>
+		<button class="btn coral text-xl" onclick={playAgain} use:clickFeedback>Play Again</button>
 	</div>
 </div>

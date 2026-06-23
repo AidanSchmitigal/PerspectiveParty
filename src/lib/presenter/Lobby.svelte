@@ -4,6 +4,7 @@
 	import { SvelteURL } from 'svelte/reactivity';
 	import { roomState } from '$lib/room.svelte';
 	import TitleFrame from '$lib/components/TitleFrame.svelte';
+	import { clickFeedback } from '$lib/feedback.svelte';
 
 	let gameState = $derived(roomState.gameState);
 
@@ -102,25 +103,27 @@
 
 	<div class="flex gap-6 justify-center mt-5">
 		<label class="flex items-center gap-2 cursor-pointer">
-			<button
-				class="size-8 rounded-lg border-3 border-ink flex items-center justify-center text-lg font-bold transition-colors"
-				class:bg-coral={showGrid}
-				class:bg-white={!showGrid}
-				class:text-white={showGrid}
-				class:text-ink={!showGrid}
-				onclick={toggleGrid}>{showGrid ? '✓' : ''}</button
-			>
+		<button
+			class="size-8 rounded-lg border-3 border-ink flex items-center justify-center text-lg font-bold transition-colors"
+			class:bg-coral={showGrid}
+			class:bg-white={!showGrid}
+			class:text-white={showGrid}
+			class:text-ink={!showGrid}
+			onclick={toggleGrid}
+			use:clickFeedback>{showGrid ? '✓' : ''}</button
+		>
 			<span class="font-title font-bold text-lg">3D Grid</span>
 		</label>
 		<label class="flex items-center gap-2 cursor-pointer">
-			<button
-				class="size-8 rounded-lg border-3 border-ink flex items-center justify-center text-lg font-bold transition-colors"
-				class:bg-coral={randomRotations}
-				class:bg-white={!randomRotations}
-				class:text-white={randomRotations}
-				class:text-ink={!randomRotations}
-				onclick={toggleRandomRotations}>{randomRotations ? '✓' : ''}</button
-			>
+		<button
+			class="size-8 rounded-lg border-3 border-ink flex items-center justify-center text-lg font-bold transition-colors"
+			class:bg-coral={randomRotations}
+			class:bg-white={!randomRotations}
+			class:text-white={randomRotations}
+			class:text-ink={!randomRotations}
+			onclick={toggleRandomRotations}
+			use:clickFeedback>{randomRotations ? '✓' : ''}</button
+		>
 			<span class="font-title font-bold text-lg">Random Rotations</span>
 		</label>
 	</div>
@@ -129,7 +132,8 @@
 		<button
 			class="btn coral text-xl disabled:grayscale"
 			disabled={!gameState.players.length}
-			onclick={startGame}>start game ▶</button
+			onclick={startGame}
+			use:clickFeedback>start game ▶</button
 		>
 	</div>
 </TitleFrame>

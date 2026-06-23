@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { roomState } from '$lib/room.svelte';
+	import { clickFeedback } from '$lib/feedback.svelte';
 
 	let sortedPlayers = $derived.by(() => {
 		return [...roomState.gameState.players].sort((a, b) => b.score - a.score);
@@ -46,5 +47,5 @@
 		{/each}
 	</div>
 
-	<button class="btn coral text-lg absolute -top-4 -right-4" onclick={nextRound}>next round</button>
+	<button class="btn coral text-lg absolute -top-4 -right-4" onclick={nextRound} use:clickFeedback>next round</button>
 </div>

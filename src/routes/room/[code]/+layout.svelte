@@ -1,10 +1,23 @@
 <script lang="ts">
-	import { roomState } from '$lib/room.svelte';
 	import { onMount } from 'svelte';
+	import { play } from '$lib/feedback.svelte';
+	import { roomState } from '$lib/room.svelte';
 
 	let { data, children } = $props();
 	let roomCode = $derived(data.roomCode);
 	let noPresenter = $derived(roomState.ready && roomState.gameState.presenterId === null);
+
+	let prevPhase = $state('');
+
+	$effect(() => {
+		const phase = roomState.gameState?.phase;
+		if (!phase) return;
+		if (prevPhase && prevPhase !== phase) {
+			navigator.vibrate?.(15);
+			play('honk');
+		}
+		prevPhase = phase;
+	});
 
 	onMount(() => {
 		roomState.connect(roomCode);

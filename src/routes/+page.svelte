@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { makeRoomCode } from '$lib/game';
 	import TitleFrame from '../lib/components/TitleFrame.svelte';
+	import { clickFeedback } from '$lib/feedback.svelte';
 
 	let roomInput = $state('');
 
@@ -29,7 +30,7 @@
 
 <TitleFrame>
 	<div class="mt-6 flex gap-4 flex-col text-center items-center">
-		<button class="btn coral text-xl" onclick={createRoom}>create room ▶</button>
+		<button class="btn coral text-xl" onclick={createRoom} use:clickFeedback>create room ▶</button>
 		<div class="flex gap-4">
 			<input
 				type="text"
@@ -41,7 +42,7 @@
 				bind:value={roomInput}
 				onkeydown={(event) => event.key === 'Enter' && joinRoom()}
 			/>
-			<button class="btn sky" onclick={joinRoom}>join</button>
+			<button class="btn sky" onclick={joinRoom} use:clickFeedback>join</button>
 		</div>
 	</div>
 </TitleFrame>

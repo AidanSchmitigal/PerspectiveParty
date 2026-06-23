@@ -3,6 +3,7 @@
 	import { getTimeRemaining } from '$lib/game';
 	import { roomState } from '$lib/room.svelte';
 	import { onMount } from 'svelte';
+	import { clickFeedback } from '$lib/feedback.svelte';
 
 	let myId = $derived(roomState.selfId);
 
@@ -128,18 +129,19 @@
 
 							{#if !isSelf}
 								<div class="absolute w-full justify-center flex gap-1 -bottom-6">
-									{#each Array(maxRank) as _, rankIdx (rankIdx)}
-										<button
-											class="text-4xl size-12 rounded-full border-3 border-ink font-bold flex items-center justify-center cursor-pointer {selectedRank ===
-											rankIdx
-												? rankColor(rankIdx) + ' bg-yellow ring-3 ring-offset-3 ring-ink'
-												: 'bg-white'}"
-											onclick={() => selectRank(player.id, rankIdx)}
-											disabled={voted}
-										>
-											{rankLabel(rankIdx)}
-										</button>
-									{/each}
+	{#each Array(maxRank) as _, rankIdx (rankIdx)}
+		<button
+			class="text-4xl size-12 rounded-full border-3 border-ink font-bold flex items-center justify-center cursor-pointer {selectedRank ===
+			rankIdx
+				? rankColor(rankIdx) + ' bg-yellow ring-3 ring-offset-3 ring-ink'
+				: 'bg-white'}"
+			onclick={() => selectRank(player.id, rankIdx)}
+			disabled={voted}
+			use:clickFeedback
+		>
+			{rankLabel(rankIdx)}
+		</button>
+	{/each}
 								</div>
 							{/if}
 						</div>
@@ -149,7 +151,7 @@
 
 			<div class="mt-8 flex justify-center">
 				{#if !voted}
-					<button class="btn coral text-lg" onclick={submitVotes} disabled={!canSubmit}>
+					<button class="btn coral text-lg" onclick={submitVotes} disabled={!canSubmit} use:clickFeedback>
 						Submit Votes
 					</button>
 				{/if}
