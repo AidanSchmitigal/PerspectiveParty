@@ -32,7 +32,7 @@
 		class="h-80 flex items-center justify-center border-3 border-dashed border-ink rounded-2xl relative overlfow-clip stripes"
 	>
 		<div
-			class="absolute top-3 right-3 bg-white ink py-1.5 px-4 font-title font-bold text-xl rotate-3"
+			class="absolute z-10 top-3 right-3 bg-white ink py-1.5 px-4 font-title font-bold text-xl rotate-3"
 		>
 			{display}
 		</div>

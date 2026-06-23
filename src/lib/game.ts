@@ -1,5 +1,8 @@
 export type Phase = 'lobby' | 'study' | 'draw' | 'reveal';
 
+const angles = ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'];
+export type Angles = (typeof angles)[number];
+
 export type Avatar = {
 	drawing: string;
 };
@@ -19,7 +22,7 @@ export type Challenge = {
 	id: string;
 	name: string;
 	prompt: string;
-	targetAngle: string;
+	targetAngle: Angles;
 	model: string;
 };
 
@@ -84,7 +87,7 @@ export const challenges: Challenge[] = modelNames.map((name) => ({
 	id: `model-${name}`,
 	name: `Shape ${name}`,
 	prompt: 'Study the 3D shape from every angle.',
-	targetAngle: 'Draw the view from above-left',
+	targetAngle: angles[Math.floor(Math.random() * angles.length)],
 	model: `/models/${name}.glb`
 }));
 
