@@ -61,7 +61,7 @@
 	<h3 style="margin: 22px 0 0; text-align: center">
 		{playerCount} doodlers in the room
 	</h3>
-	<div class="grid grid-cols-[repeat(auto-fill,minmax(86px,1fr))] gap-4 mt-4.5">
+	<div class="mx-auto grid grid-cols-[repeat(auto-fill,minmax(86px,1fr))] gap-4 mt-4.5 max-w-lg">
 		{#each gameState.players as player, i (player.name)}
 			<div class="flex flex-col items-center">
 				<div
@@ -108,8 +108,8 @@
 				class:bg-white={!showGrid}
 				class:text-white={showGrid}
 				class:text-ink={!showGrid}
-				onclick={toggleGrid}
-			>{showGrid ? '✓' : ''}</button>
+				onclick={toggleGrid}>{showGrid ? '✓' : ''}</button
+			>
 			<span class="font-title font-bold text-lg">3D Grid</span>
 		</label>
 		<label class="flex items-center gap-2 cursor-pointer">
@@ -119,8 +119,8 @@
 				class:bg-white={!randomRotations}
 				class:text-white={randomRotations}
 				class:text-ink={!randomRotations}
-				onclick={toggleRandomRotations}
-			>{randomRotations ? '✓' : ''}</button>
+				onclick={toggleRandomRotations}>{randomRotations ? '✓' : ''}</button
+			>
 			<span class="font-title font-bold text-lg">Random Rotations</span>
 		</label>
 	</div>

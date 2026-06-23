@@ -1,6 +1,6 @@
 <script lang="ts">
 	import PresenterScene from '$lib/components/PresenterScene.svelte';
-	import { getTimeRemaining, POINTS_PER_RANK } from '$lib/game';
+	import { getTimeRemaining, POINTS_PER_RANK, ROUND_COUNT } from '$lib/game';
 	import { roomState } from '$lib/room.svelte';
 	import { onMount } from 'svelte';
 
@@ -71,7 +71,13 @@
 	}
 </script>
 
-<div class="frame relative">
+<div class="frame">
+	<div
+		class="absolute z-10 -top-3 -right-3 bg-white ink py-1.5 px-4 font-title font-bold text-xl rotate-3"
+	>
+		{roomState.gameState.round} / {ROUND_COUNT}
+	</div>
+
 	{#if needsVoting}
 		<div class="text-center font-title text-2xl font-bold mt-2 mb-1">Voting in progress</div>
 	{:else}
@@ -79,14 +85,14 @@
 	{/if}
 
 	<div
-		class="h-36 flex items-center justify-center border-3 border-dashed border-ink rounded-2xl relative overflow-clip stripes mb-3"
+		class="h-36 flex items-center justify-center border-3 border-dashed border-ink rounded-2xl relative overflow-clip stripes mb-3 max-w-lg mx-auto"
 	>
 		<PresenterScene />
 		<PresenterScene ortho />
 	</div>
 
 	{#if needsVoting}
-		<div class="flex items-center justify-between mb-2">
+		<div class="flex items-center justify-between mb-2 max-w-lg mx-auto">
 			<div class="bg-white ink-sm py-1 px-3 font-title font-bold text-sm">
 				{display || '--:--'}
 			</div>

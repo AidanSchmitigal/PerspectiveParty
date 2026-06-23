@@ -13,7 +13,7 @@
 <div class="frame relative">
 	<div class="text-center font-title text-2xl font-bold mb-4">Leaderboard</div>
 
-	<div class="divide-ink/20 divide-y-2">
+	<div class="divide-ink/20 divide-y-2 max-w-lg mx-auto">
 		{#each sortedPlayers as player, i (player.id)}
 			<div class="flex items-center gap-4 p-3 bg-white">
 				<div class="font-title font-bold text-4xl w-10 text-center shrink-0">

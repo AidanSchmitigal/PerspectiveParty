@@ -6,6 +6,7 @@
 	import Draw from './Draw.svelte';
 	import Reveal from './Reveal.svelte';
 	import Scores from './Scores.svelte';
+	import Final from './Final.svelte';
 
 	let joined = $state(false);
 	let phase = $derived(roomState.gameState.phase);
@@ -32,4 +33,6 @@
 	<Reveal />
 {:else if phase == 'scores'}
 	<Scores />
+{:else if phase == 'finished'}
+	<Final />
 {/if}

@@ -40,7 +40,7 @@
 	});
 </script>
 
-<div class="frame">
+<div class="frame max-w-lg">
 	<div class="w-18 h-2 bg-ink rounded mx-auto mb-2"></div>
 	<div class="text-center">
 		<h2 class="text-xl mt-1 mb-2">make your doodler</h2>
@@ -68,7 +68,9 @@
 		<input type="text" id="ccName" placeholder="Lentil" maxlength="14" bind:value={name} />
 
 		{#if !autoJoin}
-			<button class="btn grass w-full text-lg mt-4" onclick={() => onjoin(name, avatar)}>Join Game</button>
+			<button class="btn grass w-full text-lg mt-4" onclick={() => onjoin(name, avatar)}
+				>Join Game</button
+			>
 		{/if}
 	</div>
 </div>

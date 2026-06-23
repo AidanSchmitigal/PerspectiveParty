@@ -5,6 +5,7 @@
 	import Draw from './Draw.svelte';
 	import Reveal from './Reveal.svelte';
 	import Scores from './Scores.svelte';
+	import Final from './Final.svelte';
 </script>
 
 {#if roomState.gameState.phase == 'lobby'}
@@ -17,4 +18,6 @@
 	<Reveal />
 {:else if roomState.gameState.phase == 'scores'}
 	<Scores />
+{:else if roomState.gameState.phase == 'finished'}
+	<Final />
 {/if}

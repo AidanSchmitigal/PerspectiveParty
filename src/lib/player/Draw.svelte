@@ -15,7 +15,7 @@
 	}
 </script>
 
-<div class="frame">
+<div class="frame max-w-lg">
 	<div class="w-18 h-2 bg-ink rounded mx-auto mb-2"></div>
 	<div class="text-center">
 		<div class="flex gap-1.5 justify-center mb-2 overflow-x-auto">

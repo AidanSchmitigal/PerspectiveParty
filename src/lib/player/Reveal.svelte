@@ -72,7 +72,7 @@
 	}
 </script>
 
-<div class="frame">
+<div class="frame max-w-lg">
 	<div class="text-center font-title text-2xl font-bold mt-2 mb-1">
 		{needsVoting ? 'Vote for the best drawing!' : 'How did you do?'}
 	</div>

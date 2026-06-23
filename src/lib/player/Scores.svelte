@@ -14,11 +14,11 @@
 	}
 </script>
 
-<div class="frame">
+<div class="frame max-w-lg">
 	<div class="w-18 h-2 bg-ink rounded mx-auto mb-2"></div>
 	<div class="text-center font-title text-2xl font-bold mb-4">Leaderboard</div>
 
-	<div class="space-y-2">
+	<div class="space-y-2 max-w-lg mx-auto">
 		{#each sortedPlayers as player, i (player.id)}
 			{@const isMe = player.id === myId}
 			<div

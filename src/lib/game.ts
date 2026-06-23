@@ -74,7 +74,7 @@ export type ServerMessage = { type: 'state'; state: GameState } | { type: 'hello
 export const STUDY_DURATION = 10;
 export const DRAW_DURATION = 60;
 export const VOTING_DURATION = 30;
-export const ROUND_COUNT = 10;
+export const ROUND_COUNT = 5;
 export const POINTS_PER_RANK = [3, 2, 1];
 
 const models: { name: string; validAngles: Angles[] }[] = [

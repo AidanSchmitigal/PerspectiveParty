@@ -1,6 +1,6 @@
 <script lang="ts">
 	import PresenterScene from '$lib/components/PresenterScene.svelte';
-	import { DRAW_DURATION, getTimeRemaining } from '$lib/game';
+	import { DRAW_DURATION, getTimeRemaining, ROUND_COUNT } from '$lib/game';
 	import { roomState } from '$lib/room.svelte';
 	import { onMount } from 'svelte';
 
@@ -27,12 +27,18 @@
 </script>
 
 <div class="frame">
+	<div
+		class="absolute z-10 -top-3 -right-3 bg-white ink py-1.5 px-4 font-title font-bold text-xl rotate-3"
+	>
+		{roomState.gameState.round} / {ROUND_COUNT}
+	</div>
+
 	<div class="text-center font-title text-2xl font-bold mt-4 mb-2">Draw the shape!</div>
 	<div class="text-center font-title text-lg -mt-2 mb-2">
 		from the <span class="text-2xl">{roomState.gameState.challenge.targetAngle}</span> side
 	</div>
 	<div
-		class="h-80 flex items-center justify-center border-3 border-dashed border-ink rounded-2xl relative overlfow-clip stripes"
+		class="h-80 flex items-center justify-center border-3 border-dashed border-ink rounded-2xl relative overlfow-clip stripes max-w-lg mx-auto"
 	>
 		<div
 			class="absolute z-10 top-3 right-3 bg-white ink py-1.5 px-4 font-title font-bold text-xl rotate-3"
@@ -42,7 +48,7 @@
 		<PresenterScene />
 	</div>
 
-	<div class="flex gap-2.5 mt-4 flex-wrap pt-1.5 px-1">
+	<div class="flex gap-2.5 mt-4 flex-wrap pt-1.5 px-1 max-w-lg mx-auto">
 		{#each roomState.gameState.players as player, i (player.id)}
 			<div class="shrink-0 flex flex-col items-center">
 				<div class="relative">
