@@ -3,15 +3,14 @@ import { parse } from 'url';
 import { WebSocket, WebSocketServer } from 'ws';
 import {
 	challenges,
-	sanitizeName,
-	VOTING_DURATION,
 	POINTS_PER_RANK,
+	ROUND_COUNT,
+	sanitizeName,
 	type Avatar,
 	type ClientMessage,
 	type GameState,
 	type Player,
-	type ServerMessage,
-	type Vote
+	type ServerMessage
 } from '../src/lib/game';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -30,7 +29,8 @@ class GameRoom {
 			players: [],
 			votes: [],
 			updatedAt: Date.now(),
-			phaseStartedAt: Date.now()
+			phaseStartedAt: Date.now(),
+			settings: { showGrid: false, randomRotations: false }
 		};
 	}
 
@@ -85,15 +85,20 @@ class GameRoom {
 				break;
 			case 'next-round':
 				this.state.round += 1;
-				this.state.phase = 'study';
-				this.state.phaseStartedAt = Date.now();
-				this.state.challenge = challenges[this.state.round % challenges.length];
-				this.state.votes = [];
-				this.state.players = this.state.players.map((player) => ({
-					...player,
-					drawing: undefined,
-					done: false
-				}));
+				if (this.state.round >= ROUND_COUNT) {
+					this.state.phase = 'finished';
+					this.state.phaseStartedAt = Date.now();
+				} else {
+					this.state.phase = 'study';
+					this.state.phaseStartedAt = Date.now();
+					this.state.challenge = challenges[this.state.round % challenges.length];
+					this.state.votes = [];
+					this.state.players = this.state.players.map((player) => ({
+						...player,
+						drawing: undefined,
+						done: false
+					}));
+				}
 				break;
 			case 'drawing':
 				this.patchPlayer(senderId, { drawing: parsed.dataUrl, done: false });
@@ -113,6 +118,9 @@ class GameRoom {
 						? { ...player, score: Math.max(0, player.score + parsed.delta) }
 						: player
 				);
+				break;
+			case 'update-settings':
+				this.state.settings = { ...this.state.settings, ...parsed.settings };
 				break;
 			case 'reset':
 				this.state = this.makeInitialState();
@@ -137,21 +145,42 @@ class GameRoom {
 			players: [],
 			votes: [],
 			updatedAt: Date.now(),
-			phaseStartedAt: Date.now()
+			phaseStartedAt: Date.now(),
+			settings: { showGrid: false, randomRotations: false }
 		};
 	}
 
 	private upsertPlayer(id: string, name?: string, avatar?: Avatar) {
 		const existing = this.state.players.find((player) => player.id === id);
+
+		let desiredName: string;
+		if (name !== undefined) {
+			desiredName = sanitizeName(name);
+		} else if (existing) {
+			desiredName = existing.name;
+		} else {
+			desiredName = sanitizeName('');
+		}
+
+		const otherNames = new Set(this.state.players.filter((p) => p.id !== id).map((p) => p.name));
+		let finalName = desiredName;
+		if (otherNames.has(finalName)) {
+			let counter = 2;
+			while (otherNames.has(`${desiredName} ${counter}`)) {
+				counter++;
+			}
+			finalName = `${desiredName} ${counter}`;
+		}
+
 		if (existing) {
-			if (name !== undefined) existing.name = sanitizeName(name);
+			if (name !== undefined) existing.name = finalName;
 			if (avatar !== undefined) existing.avatar = avatar;
 			existing.connected = true;
 			return;
 		}
 		this.state.players.push({
 			id,
-			name: name !== undefined ? sanitizeName(name) : sanitizeName(''),
+			name: finalName,
 			avatar: avatar ?? { drawing: '' },
 			score: 0,
 			connected: true,

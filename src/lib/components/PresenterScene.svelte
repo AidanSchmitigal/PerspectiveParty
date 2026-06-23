@@ -91,6 +91,12 @@
 	let targetAngle = $derived(roomState.gameState.challenge.targetAngle);
 	let arrow = $derived(arrowConfig[targetAngle]);
 	let model = $derived(roomState.gameState.challenge.model);
+	let showGrid = $derived(roomState.gameState.settings.showGrid);
+	let challengeRotation = $derived(roomState.gameState.challenge.rotation);
+	let randomRotations = $derived(roomState.gameState.settings.randomRotations);
+	let modelRotation: [number, number, number] = $derived(
+		randomRotations ? challengeRotation : [0, 0, 0]
+	);
 
 	let angle = new Spring(0.6, { stiffness: 0.001, damping: 0, precision: 0.001 });
 	let spin: Counter | Spring<number> = new Counter(0, { autoStart: true, rate: 1 });
@@ -230,9 +236,12 @@
 		<T.DirectionalLight color="#4488ff" intensity={0.6} position={[3, -1, -3]} />
 		<T.DirectionalLight color="#ffffff" intensity={0.8} position={[1, -3, 5]} />
 
-		<!-- <T.GridHelper args={[10, 10]} /> -->
+		{#if showGrid}
+			<T.GridHelper args={[10, 10]} />
+		{/if}
+
 		{#if !hideModel}
-			<GLTF url={model} position={[0, 0, 0]} onload={handleGltfLoad} />
+			<GLTF url={model} position={[0, 0, 0]} rotation={modelRotation} onload={handleGltfLoad} />
 		{:else}
 			<T.Mesh scale={[1.5, 1.5, 1.5]}>
 				<T.BoxGeometry />

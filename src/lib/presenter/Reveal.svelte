@@ -71,7 +71,6 @@
 	}
 </script>
 
-dfsfdf
 <div class="frame relative">
 	{#if needsVoting}
 		<div class="text-center font-title text-2xl font-bold mt-2 mb-1">Voting in progress</div>

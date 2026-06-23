@@ -9,6 +9,9 @@
 
 	let playerCount: number = $derived(gameState.players.length);
 
+	let showGrid = $derived(gameState.settings.showGrid);
+	let randomRotations = $derived(gameState.settings.randomRotations);
+
 	let qrDataUrl: string | null = $state(null);
 
 	onMount(() => {
@@ -24,6 +27,14 @@
 			qrDataUrl = url;
 		});
 	});
+
+	function toggleGrid() {
+		roomState.send({ type: 'update-settings', settings: { showGrid: !showGrid } });
+	}
+
+	function toggleRandomRotations() {
+		roomState.send({ type: 'update-settings', settings: { randomRotations: !randomRotations } });
+	}
 
 	function startGame() {
 		if (!gameState.players.length) return;
@@ -87,6 +98,31 @@
 				</div>
 			</div>
 		{/if}
+	</div>
+
+	<div class="flex gap-6 justify-center mt-5">
+		<label class="flex items-center gap-2 cursor-pointer">
+			<button
+				class="size-8 rounded-lg border-3 border-ink flex items-center justify-center text-lg font-bold transition-colors"
+				class:bg-coral={showGrid}
+				class:bg-white={!showGrid}
+				class:text-white={showGrid}
+				class:text-ink={!showGrid}
+				onclick={toggleGrid}
+			>{showGrid ? '✓' : ''}</button>
+			<span class="font-title font-bold text-lg">3D Grid</span>
+		</label>
+		<label class="flex items-center gap-2 cursor-pointer">
+			<button
+				class="size-8 rounded-lg border-3 border-ink flex items-center justify-center text-lg font-bold transition-colors"
+				class:bg-coral={randomRotations}
+				class:bg-white={!randomRotations}
+				class:text-white={randomRotations}
+				class:text-ink={!randomRotations}
+				onclick={toggleRandomRotations}
+			>{randomRotations ? '✓' : ''}</button>
+			<span class="font-title font-bold text-lg">Random Rotations</span>
+		</label>
 	</div>
 
 	<div style="text-align: center; margin-top: 24px">

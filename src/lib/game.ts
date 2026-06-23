@@ -1,6 +1,6 @@
 import { shuffleArray } from '$lib';
 
-export type Phase = 'lobby' | 'study' | 'draw' | 'reveal' | 'scores';
+export type Phase = 'lobby' | 'study' | 'draw' | 'reveal' | 'scores' | 'finished';
 
 export type Vote = {
 	voterId: string;
@@ -35,6 +35,12 @@ export type Challenge = {
 	prompt: string;
 	targetAngle: Angles;
 	model: string;
+	rotation: [number, number, number];
+};
+
+export type GameSettings = {
+	showGrid: boolean;
+	randomRotations: boolean;
 };
 
 export type GameState = {
@@ -47,6 +53,7 @@ export type GameState = {
 	votes: Vote[];
 	updatedAt: number;
 	phaseStartedAt: number;
+	settings: GameSettings;
 };
 
 export type ClientMessage =
@@ -59,9 +66,16 @@ export type ClientMessage =
 	| { type: 'done'; done: boolean }
 	| { type: 'submit-vote'; rankings: string[] }
 	| { type: 'score'; playerId: string; delta: number }
-	| { type: 'reset' };
+	| { type: 'reset' }
+	| { type: 'update-settings'; settings: Partial<GameSettings> };
 
 export type ServerMessage = { type: 'state'; state: GameState } | { type: 'hello'; id: string };
+
+export const STUDY_DURATION = 10;
+export const DRAW_DURATION = 60;
+export const VOTING_DURATION = 30;
+export const ROUND_COUNT = 10;
+export const POINTS_PER_RANK = [3, 2, 1];
 
 const models: { name: string; validAngles: Angles[] }[] = [
 	{ name: '01', validAngles: ['Red', 'Blue', 'Yellow', 'Cyan'] },
@@ -154,14 +168,14 @@ export const challenges: Challenge[] = shuffleArray(
 		name: `Shape ${model.name}`,
 		prompt: 'Study the 3D shape from every angle.',
 		targetAngle: model.validAngles[Math.floor(Math.random() * model.validAngles.length)],
-		model: `/models/${model.name}.glb`
+		model: `/models/${model.name}.glb`,
+		rotation: [
+			Math.random() * Math.PI * 2,
+			Math.random() * Math.PI * 2,
+			Math.random() * Math.PI * 2
+		] as [number, number, number]
 	}))
-).slice(0, 10);
-
-export const STUDY_DURATION = 10;
-export const DRAW_DURATION = 60;
-export const VOTING_DURATION = 30;
-export const POINTS_PER_RANK = [3, 2, 1];
+).slice(0, ROUND_COUNT);
 
 export function makeRoomCode() {
 	const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
