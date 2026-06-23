@@ -63,7 +63,8 @@ class RoomState {
 }
 
 function getWsUrl(code: string) {
-	return `ws://${window.location.host}/ws?room=${code}`;
+	const protocol = import.meta.env.DEV ? 'ws' : 'wss';
+	return `${protocol}://${window.location.host}/ws?room=${code}`;
 }
 
 export const roomState = new RoomState();
