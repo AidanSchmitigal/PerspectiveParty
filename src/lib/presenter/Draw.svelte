@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PresenterScene from '$lib/components/PresenterScene.svelte';
 	import { DRAW_DURATION, getTimeRemaining } from '$lib/game';
 	import { roomState } from '$lib/room.svelte';
 	import { onMount } from 'svelte';
@@ -14,18 +15,19 @@
 
 	let display = $derived(getTimeRemaining('draw', roomState.gameState.phaseStartedAt, now));
 
+	let allPlayersDone = $derived(roomState.gameState.players.every((p) => p.done));
+
 	$effect(() => {
 		if (roomState.gameState.phase !== 'draw') return;
 		const elapsed = now - roomState.gameState.phaseStartedAt;
-		const allPlayersDone = roomState.gameState.players.every((p) => p.done);
-		if (elapsed >= DRAW_DURATION * 1000 && !allPlayersDone) {
-			roomState.send({ type: 'phase', phase: 'reveal' });
+		if (elapsed >= DRAW_DURATION * 1000 || allPlayersDone) {
+			// roomState.send({ type: 'phase', phase: 'reveal' });
 		}
 	});
 </script>
 
 <div class="frame">
-	<div class="text-center font-title text-2xl font-bold mt-4 mb-2">Watch the shape!</div>
+	<div class="text-center font-title text-2xl font-bold mt-4 mb-2">Draw the shape!</div>
 	<div
 		class="h-80 flex items-center justify-center border-3 border-dashed border-ink rounded-2xl relative overlfow-clip stripes"
 	>
@@ -34,17 +36,9 @@
 		>
 			{display}
 		</div>
-		<div class="perspective-midrange">
-			<div class="size-32 relative transform-3d spin">
-				<div class="face f1">?</div>
-				<div class="face f2">?</div>
-				<div class="face f3">?</div>
-				<div class="face f4">?</div>
-				<div class="face f5">?</div>
-				<div class="face f6">?</div>
-			</div>
-		</div>
+		<PresenterScene />
 	</div>
+
 	<div class="flex gap-2.5 mt-4 flex-wrap pt-1.5 px-1">
 		{#each roomState.gameState.players as player, i (player.id)}
 			<div class="shrink-0 flex flex-col items-center">
@@ -73,64 +67,3 @@
 		{/each}
 	</div>
 </div>
-
-<style>
-	.stripes {
-		background: repeating-linear-gradient(
-			135deg,
-			rgba(82, 191, 238, 0.1) 0 14px,
-			transparent 14px 28px
-		);
-	}
-
-	.spin {
-		transform: rotateX(-45deg) rotateY(45deg);
-		/* animation: spin 7s linear infinite; */
-	}
-	@keyframes spin {
-		from {
-			transform: rotateX(0deg) rotateY(0deg);
-		}
-		to {
-			transform: rotateX(360deg) rotateY(360deg);
-		}
-	}
-
-	.face {
-		position: absolute;
-		width: 120px;
-		height: 120px;
-		border: 4px solid var(--ink);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 38px;
-		font-family: 'Baloo 2', cursive;
-		font-weight: 800;
-	}
-	.f1 {
-		background: var(--coral);
-		transform: translateZ(60px);
-	}
-	.f2 {
-		background: var(--sky);
-		transform: rotateY(180deg) translateZ(60px);
-	}
-	.f3 {
-		background: var(--yellow);
-		transform: rotateY(90deg) translateZ(60px);
-	}
-	.f4 {
-		background: var(--grass);
-		transform: rotateY(-90deg) translateZ(60px);
-	}
-	.f5 {
-		background: var(--grape);
-		transform: rotateX(90deg) translateZ(60px);
-		color: #fff;
-	}
-	.f6 {
-		background: var(--pink);
-		transform: rotateX(-90deg) translateZ(60px);
-	}
-</style>
