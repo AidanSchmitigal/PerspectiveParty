@@ -11,6 +11,7 @@
 		class="h-48 flex items-center justify-center border-3 border-dashed border-ink rounded-2xl relative overlfow-clip stripes"
 	>
 		<PresenterScene />
+		<PresenterScene ortho />
 	</div>
 	<div class="flex gap-2.5 mt-4 justify-center pt-1.5 px-1">
 		<div class="relative">

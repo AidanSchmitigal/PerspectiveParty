@@ -26,34 +26,33 @@
 			shader.vertexShader = shader.vertexShader.replace(
 				'#include <common>',
 				`#include <common>
-				varying vec3 vWorldNormal;`
+				varying vec3 vWorldPos;`
 			);
 
 			shader.vertexShader = shader.vertexShader.replace(
-				'#include <defaultnormal_vertex>',
-				`#include <defaultnormal_vertex>
-				vWorldNormal = normalize(transpose(mat3(viewMatrix)) * transformedNormal);`
+				'#include <worldpos_vertex>',
+				`#include <worldpos_vertex>
+				vWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;`
 			);
 
 			shader.fragmentShader = shader.fragmentShader.replace(
 				'#include <common>',
 				`#include <common>
 				uniform vec3 uCardinalColors[6];
-				varying vec3 vWorldNormal;`
+				varying vec3 vWorldPos;`
 			);
 
 			shader.fragmentShader = shader.fragmentShader.replace(
 				'#include <color_fragment>',
 				`#include <color_fragment>
-				vec3 _cardinalNormal = normalize(vWorldNormal);
-				vec3 _absN = abs(_cardinalNormal);
+				vec3 _absPos = abs(vWorldPos);
 				vec3 _cardinalColor;
-				if (_absN.x >= _absN.y && _absN.x >= _absN.z) {
-					_cardinalColor = uCardinalColors[_cardinalNormal.x >= 0.0 ? 0 : 1];
-				} else if (_absN.y >= _absN.x && _absN.y >= _absN.z) {
-					_cardinalColor = uCardinalColors[_cardinalNormal.y >= 0.0 ? 2 : 3];
+				if (_absPos.x >= _absPos.y && _absPos.x >= _absPos.z) {
+					_cardinalColor = uCardinalColors[vWorldPos.x >= 0.0 ? 0 : 1];
+				} else if (_absPos.y >= _absPos.x && _absPos.y >= _absPos.z) {
+					_cardinalColor = uCardinalColors[vWorldPos.y >= 0.0 ? 2 : 3];
 				} else {
-					_cardinalColor = uCardinalColors[_cardinalNormal.z >= 0.0 ? 4 : 5];
+					_cardinalColor = uCardinalColors[vWorldPos.z >= 0.0 ? 4 : 5];
 				}
 				diffuseColor.rgb *= _cardinalColor;`
 			);
@@ -180,6 +179,7 @@
 </script>
 
 <div class="size-full">
+	{model}
 	<Canvas toneMapping={THREE.ACESFilmicToneMapping} shadows dpr={[1, 2]}>
 		{#if ortho}
 			<T.OrthographicCamera

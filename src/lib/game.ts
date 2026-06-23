@@ -1,7 +1,8 @@
+import { shuffleArray } from '$lib';
+
 export type Phase = 'lobby' | 'study' | 'draw' | 'reveal';
 
-const angles = ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] as const;
-export type Angles = (typeof angles)[number];
+export type Angles = 'Red' | 'Green' | 'Blue' | 'Yellow' | 'Cyan' | 'Magenta';
 
 export type Avatar = {
 	drawing: string;
@@ -50,45 +51,98 @@ export type ClientMessage =
 
 export type ServerMessage = { type: 'state'; state: GameState } | { type: 'hello'; id: string };
 
-const modelNames = [
-	'01',
-	'02',
-	'03',
-	'04',
-	'05',
-	'06',
-	'07',
-	'08',
-	'09',
-	'10',
-	'11',
-	'12',
-	'13',
-	'14',
-	'15',
-	'16',
-	'17',
-	'18',
-	'19',
-	'20',
-	'21',
-	'22',
-	'23',
-	'24',
-	'25',
-	'26',
-	'27',
-	'28',
-	'29',
-	'30'
+const models: { name: string; validAngles: Angles[] }[] = [
+	// { name: '01', validAngles: ['Red', 'Blue', 'Yellow', 'Cyan'] },
+	// // { name: '02', validAngles: [] }, Remove
+	// { name: '03', validAngles: ['Red', 'Green', 'Magenta'] },
+	// { name: '04', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '05', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '06', validAngles: ['Red', 'Green', 'Blue', 'Magenta'] },
+	// { name: '07', validAngles: ['Red', 'Blue', 'Yellow', 'Cyan'] },
+	// { name: '08', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '09', validAngles: ['Green', 'Yellow', 'Magenta'] },
+	// { name: '10', validAngles: ['Red', 'Blue', 'Yellow'] },
+	// { name: '11', validAngles: ['Red', 'Blue', 'Yellow'] },
+	// { name: '12', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '13', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '14', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '15', validAngles: ['Red', 'Green', 'Blue', 'Yellow'] },
+	// { name: '16', validAngles: ['Blue', 'Yellow', 'Magenta'] },
+	// { name: '17', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// // { name: '18', validAngles: [] }, Remove
+	// // { name: '19', validAngles: [] }, Remove
+	// // { name: '20', validAngles: [] }, Remove
+	// { name: '21', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '22', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '23', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '24', validAngles: ['Red', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '25', validAngles: ['Red', 'Blue', 'Yellow'] },
+	// { name: '26', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '27', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '28', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '29', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '30', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+
+	// { name: '31', validAngles: ['Red', 'Blue', 'Yellow', 'Cyan',] },
+	// { name: '32', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '33', validAngles: ['Blue', 'Yellow'] },
+	// { name: '34', validAngles: ['Blue', 'Yellow'] },
+	// { name: '35', validAngles: ['Red', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '36', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '37', validAngles: ['Red', 'Blue', 'Yellow', 'Magenta'] },
+	// { name: '38', validAngles: ['Red', 'Green', 'Blue', 'Cyan', 'Magenta'] },
+	// { name: '39', validAngles: ['Blue', 'Yellow'] },
+	// { name: '40', validAngles: ['Blue', 'Yellow'] },
+	// { name: '41', validAngles: ['Red', 'Blue', 'Yellow'] },
+	// { name: '42', validAngles: ['Red', 'Green', 'Cyan', 'Magenta'] },
+	// { name: '43', validAngles: ['Red', 'Green', 'Cyan', 'Magenta'] },
+	// { name: '44', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '45', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '46', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '47', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '48', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '49', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '50', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '51', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '52', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '53', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '54', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '55', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '56', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '57', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	// { name: '58', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '59', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '60', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '61', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '62', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '63', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '64', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '65', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '66', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '67', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '68', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '69', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '70', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '71', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '72', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '73', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '74', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '75', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '76', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '77', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '78', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '79', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '80', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '81', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] },
+	{ name: '82', validAngles: ['Red', 'Green', 'Blue', 'Yellow', 'Cyan', 'Magenta'] }
 ];
 
-export const challenges: Challenge[] = modelNames.map((name) => ({
-	id: `model-${name}`,
-	name: `Shape ${name}`,
+export const challenges: Challenge[] = models.map((model) => ({
+	id: `model-${model.name}`,
+	name: `Shape ${model.name}`,
 	prompt: 'Study the 3D shape from every angle.',
-	targetAngle: angles[Math.floor(Math.random() * angles.length)],
-	model: `/models/${name}.glb`
+	targetAngle: model.validAngles[Math.floor(Math.random() * model.validAngles.length)],
+	model: `/models/${model.name}.glb`
 }));
 
 export const STUDY_DURATION = 10;
